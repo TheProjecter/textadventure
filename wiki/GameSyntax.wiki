@@ -1,0 +1,21 @@
+#summary Syntax of the map description file
+
+= Introduction =
+
+This document describes the format of the map description file.
+
+= File Name =
+
+Map description files have a name composed of the name of the adventure, in camel case, and extension '.game'. For example: 
+{{{
+   AdventureLand.game
+}}}
+
+When displaying the name of the adventure, TAC will split the words at each uppercase letter.
+
+= Details =
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
