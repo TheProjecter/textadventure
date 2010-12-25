@@ -1,0 +1,78 @@
+; The player is initially in the hall,
+; He can carry up to 6 units of items.
+
+%Player
+  LOCATION Hall
+  CANCONTAIN 6
+  
+%Key Large key with wooden handle
+  LOCATION SmallRoom
+
+; The player has a small brass key in his pocket
+
+%SmallKey Small brass key
+  LOCATION Player
+  
+; The door is closed and locked.
+; It requires the key to be unlocked and opened.
+  
+%Door Large wooden door
+;  LOCKED 1
+  KEY Key
+  
+%Hall You are in a large hall
+  NORTH Door -> TreasureRoom
+  EAST Stairs -> Terrace
+  SOUTH SmallRoom
+
+%Stairs Stairs
+
+%Terrace You are on terrace
+  WEST Stairs -> Hall
+  
+  NORTHWEST Terrace
+  SOUTHWEST Terrace
+  NORTHEAST Terrace
+  SOUTHEAST Terrace
+  
+%TreasureRoom You are in the treasure room!
+  SOUTH Door -> Hall
+
+; The small room contains the key, but you cannot see
+; it because the light is off.
+
+%SmallRoom A small room
+  NORTH Hall
+  LIGHT Lamp
+
+; The treasure is in the treasure room, of course.
+; it has a size of 6, so the player must first let go
+; of the key before he can carry the treasure.
+    
+%Treasure The Treasure
+  LOCATION TreasureRoom
+  SIZE 6
+  
+%Switch A light switch
+  SIZE 99999
+
+%%Switch
+  IF Lamp LIT 1
+  SET Lamp LIT 0
+  EXIT
+  
+%%Switch
+  SET LAMP LIT 1
+  
+%%Hall
+  IF Treasure LOCATION Player
+  WIN
+}
+
+; If the player tries the small key on the door, he will be electrocuted.
+
+%%Door SmallKey
+  MSG You are electrocuted
+  LOSE
+}
+  
