@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, TextAdventureStart!</string>
+    <string name="app_name">Text Adventure Creator</string>
+<string name="room_title">Let the adventure begin</string>
+</resources>
