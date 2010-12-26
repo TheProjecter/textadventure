@@ -25,7 +25,7 @@ Every game must define an object with the name "Player" that represents the play
 
 {{{
   %Player The player
-    LOCATION !MainEntrance
+    LOCATION MainEntrance
   %Key A small key
     LOCATION Player
 }}}
@@ -45,3 +45,36 @@ Rooms have exits that are defined with the NORTH, SOUTH, EAST, etc. properties. 
 }}}
 
 This indicates that the main hall has two exits. One obvious exit on the north leads to the dining room, while the exit on the south leads to the treasure room, through a wooden door.
+
+= Doors =
+
+Doors are defined as any other object. The description of the door is shown to the player when he is in a room with an exit through that door.
+
+The "OPEN" property indicates whether the door is currently open or closed. The "LOCKED" property indicates whether the door is currently locked. If the door is not locked the player is free to open or close it. If the door is locked, the player cannot open or close it.
+
+To lock and unlock a door, the player may use a key:
+
+{{{
+  %WoodenDoor A wooden door
+  OPEN 0
+  LOCKED 1
+  KEY Key
+}}}
+
+This indicates that the wooden door is initially closed and locked, and can be unlocked by using the key.
+
+= Light sources =
+
+A room may have a light source. A light source is also defined as an object. The "LIT" property of a light source indicates whether it is lit or not.
+
+If you do not define a light source for a room, it is assumed that the room is always visible. Otherwise, the player will only be able to interact with the room when either the light source for the room is lit, or he is carrying a lit object.
+
+{{{
+  %TreasureRoom The treasure room
+    LIGHTSOURCE Lamp
+
+  %Lamp A lamp
+    LIT 0
+}}}
+
+Lighting has no intensity, the object is either completely lit or completely unlit. If it is lit, it produces enough light to see the entire room.
