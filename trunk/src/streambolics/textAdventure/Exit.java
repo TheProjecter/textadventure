@@ -57,6 +57,7 @@ public class Exit
         {
             _Door = _Game.accessItem (d);
             _DestinationRoom = _Game.accessItem (t.getWord ());
+            _Door.setProbableTheme (_SourceRoom.getTheme ());
         }
         else
         {

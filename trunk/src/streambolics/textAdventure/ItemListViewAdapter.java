@@ -48,7 +48,7 @@ public class ItemListViewAdapter extends ArrayAdapter<Item>
         if (aConvertView != null)
         {
             v = (ItemView) aConvertView;
-            v.setItem (itm);
+            v.setItem (_Context, itm);
         }
         else
         {

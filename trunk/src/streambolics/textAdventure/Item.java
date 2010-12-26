@@ -38,7 +38,7 @@ import android.graphics.drawable.Drawable;
  * 
  */
 
-public class Item
+public class Item implements ThemeProvider
 {
     private Game _Game;
     private String _Name;
@@ -63,6 +63,9 @@ public class Item
     private int _Size;
     private int _InnerSize;
     private int _OpeningSize;
+
+    private ThemeProvider _ThemeProvider;
+    private String _Theme;
 
     public Item (Game aGame, String aName)
     {
@@ -243,6 +246,16 @@ public class Item
         else if (aPropName.equals ("LIGHT"))
         {
             _LightSource = _Game.accessItem (aPropVal);
+            _LightSource.setProbableTheme ("LAMP");
+        }
+        else if (aPropName.equals ("KEY"))
+        {
+            _Key = _Game.accessItem (aPropVal);
+            _Key.setProbableTheme ("KEY");
+        }
+        else if (aPropName.equals ("ICON"))
+        {
+            setTheme (aPropVal);
         }
         else if (aPropName.equals ("OPEN"))
         {
@@ -368,24 +381,66 @@ public class Item
         }
     }
 
+    private ThemeProvider getThemeProvider (Context aContext)
+    {
+        if (_ThemeProvider == null)
+        {
+            if (_Theme == null)
+            {
+                _Theme = "DEFAULT";
+            }
+            _ThemeProvider = StockThemes.getTheme (aContext, _Theme);
+        }
+        return _ThemeProvider;
+    }
+
+    private void setTheme (String aTheme)
+    {
+        _Theme = aTheme;
+        _ThemeProvider = null;
+    }
+
+    public String getTheme ()
+    {
+        return _Theme;
+    }
+
+    public void setProbableTheme (String aTheme)
+    {
+        if (_Theme == null)
+        {
+            setTheme (aTheme);
+        }
+    }
+
+    @Override
     public Drawable getFloorDrawable (Context aContext)
     {
-        return StockDrawables.Floor (aContext);
+        return getThemeProvider (aContext).getFloorDrawable (aContext);
     }
 
+    @Override
     public Drawable getWallDrawable (Context aContext)
     {
-        return StockDrawables.Wall (aContext);
+        return getThemeProvider (aContext).getWallDrawable (aContext);
     }
 
+    @Override
     public Drawable getOpenDoorDrawable (Context aContext)
     {
-        return StockDrawables.OpenDoor (aContext);
+        return getThemeProvider (aContext).getOpenDoorDrawable (aContext);
     }
 
+    @Override
     public Drawable getClosedDoorDrawable (Context aContext)
     {
-        return StockDrawables.ClosedDoor (aContext);
+        return getThemeProvider (aContext).getClosedDoorDrawable (aContext);
+    }
+
+    @Override
+    public Drawable getInventoryDrawable (Context aContext)
+    {
+        return getThemeProvider (aContext).getInventoryDrawable (aContext);
     }
 
 }

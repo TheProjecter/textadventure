@@ -23,6 +23,7 @@ package streambolics.android;
  ---------------------------------------------------------------------------------------------------*/
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
 /***
@@ -37,9 +38,11 @@ import android.view.View;
 
 public class SquareBoardLayout extends CustomLayout
 {
+    private final String TAG = "SquareBoardLayout";
     private View _Board;
     private View _Panel1;
     private View _Panel2;
+    private int _GridSize = 1;
 
     public SquareBoardLayout (Context context)
     {
@@ -109,8 +112,14 @@ public class SquareBoardLayout extends CustomLayout
             SquareSize = Math.min (Width, Height * 3 / 4);
             HalfSize = Width / 2;
         }
-
-        _Board.layout (l, t, l + SquareSize, t + SquareSize);
+        int border = SquareSize % _GridSize;
+        int truesize = SquareSize - border;
+        border /= 2;
+        Log.d (TAG, "SquareSize = " + Integer.toString (SquareSize));
+        Log.d (TAG, "GridSize = " + Integer.toString (_GridSize));
+        Log.d (TAG, "Border = " + Integer.toString (border));
+        Log.d (TAG, "TrueSize = " + Integer.toString (truesize));
+        _Board.layout (l + border, t + border, l + truesize + border, t + truesize + border);
 
         if (Landscape)
         {
@@ -122,5 +131,10 @@ public class SquareBoardLayout extends CustomLayout
             _Panel1.layout (l, t + SquareSize, l + HalfSize, b);
             _Panel2.layout (l + HalfSize, t + SquareSize, r, b);
         }
+    }
+
+    public void setGridSize (int n)
+    {
+        _GridSize = n;
     }
 }

@@ -386,7 +386,7 @@ public class TextAdventureRoom extends Activity implements Logger
         Text_Inventory = new InventoryView (this);
         Text_Events = new StandardTextView (this);
         Layout_All = new SquareBoardLayout (this, Layout_Room, Text_Inventory, Text_Events);
-
+        Layout_All.setGridSize (Layout_Room.getGridSize ());
         Text_Events.setText ("Here are events");
 
         setContentView (Layout_All);

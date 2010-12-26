@@ -79,6 +79,7 @@ public class SurroundedDrawable extends Drawable
             else
             {
                 t = _Bounds.centerY () - _Cell.height () / 2;
+                t -= t % _Cell.height ();
             }
 
             if (_Left == null)
@@ -92,6 +93,7 @@ public class SurroundedDrawable extends Drawable
             else
             {
                 l = _Bounds.centerX () - _Cell.width () / 2;
+                l -= l % _Cell.width ();
             }
 
             _CenterPos = new Rect (l, t, l + _Cell.width (), t + _Cell.height ());

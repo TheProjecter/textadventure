@@ -23,6 +23,7 @@ package streambolics.android;
  ---------------------------------------------------------------------------------------------------*/
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -35,19 +36,19 @@ public class IconAndTextView extends CustomLayout
     private ImageView _Icon;
     private int _Height;
 
-    public IconAndTextView (Context aContext, int aIcon, String aText, int aHeight)
+    public IconAndTextView (Context aContext, Drawable aIcon, String aText, int aHeight)
     {
         super (aContext);
         Initialize (aContext, aIcon, aText, aHeight);
     }
 
-    public IconAndTextView (Context aContext, int aIcon, String aText)
+    public IconAndTextView (Context aContext, Drawable aIcon, String aText)
     {
         super (aContext);
         Initialize (aContext, aIcon, aText, 24);
     }
 
-    private void Initialize (Context aContext, int aIcon, String aText, int aHeight)
+    private void Initialize (Context aContext, Drawable aIcon, String aText, int aHeight)
     {
         _Text = new TextView (aContext);
         addView (_Text);
@@ -78,12 +79,12 @@ public class IconAndTextView extends CustomLayout
 
     private int measureWidth (int measureSpec)
     {
-        return getMeasurement (measureSpec, _Height + 2 + _Text.getMeasuredWidth ());
+        return getMeasurement (measureSpec, _Icon.getMeasuredWidth () + 2 + _Text.getMeasuredWidth ());
     }
 
     private int measureHeight (int measureSpec)
     {
-        return getMeasurement (measureSpec, _Height);
+        return getMeasurement (measureSpec, _Icon.getMeasuredHeight ());
     }
 
     private int getMeasurement (int measureSpec, int preferred)
@@ -117,11 +118,8 @@ public class IconAndTextView extends CustomLayout
         _Text.setText (aText);
     }
 
-    public void setIcon (int aIcon)
+    public void setIcon (Drawable aDrawable)
     {
-        if (aIcon >= 0)
-        {
-            _Icon.setImageResource (aIcon);
-        }
+        _Icon.setImageDrawable (aDrawable);
     }
 }
