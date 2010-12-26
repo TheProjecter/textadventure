@@ -7,35 +7,34 @@
   
 %Key Large key with wooden handle
   LOCATION SmallRoom
-
+  ICON Key
+  
 ; The player has a small brass key in his pocket
 
 %SmallKey Small brass key
   LOCATION Player
+  ICON Key
   
 ; The door is closed and locked.
 ; It requires the key to be unlocked and opened.
   
 %Door Large wooden door
-;  LOCKED 1
+  LOCKED 1
   KEY Key
   
-%Hall You are in a large hall
+%Hall A large hall
   NORTH Door -> TreasureRoom
   EAST Stairs -> Terrace
   SOUTH SmallRoom
 
 %Stairs Stairs
-
-%Terrace You are on terrace
+  ICON Stairs
+  
+%Terrace A terrace
   WEST Stairs -> Hall
-  
-  NORTHWEST Terrace
-  SOUTHWEST Terrace
-  NORTHEAST Terrace
-  SOUTHEAST Terrace
-  
-%TreasureRoom You are in the treasure room!
+  ICON Garden
+    
+%TreasureRoom The treasure room!
   SOUTH Door -> Hall
 
 ; The small room contains the key, but you cannot see
@@ -55,7 +54,11 @@
   
 %Switch A light switch
   SIZE 99999
-
+  LOCATION Hall
+  
+%Zizogen A Zizogen
+  LOCATION Player
+  
 %%Switch
   IF Lamp LIT 1
   SET Lamp LIT 0

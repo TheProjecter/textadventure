@@ -29,12 +29,12 @@ public class ItemView extends IconAndTextView
 {
     public ItemView (Context aContext, Item aItem)
     {
-        super (aContext, aItem.getIconResourceId (), aItem.getDescription ());
+        super (aContext, aItem.getInventoryDrawable (aContext), aItem.getDescription ());
     }
 
-    public void setItem (Item aItem)
+    public void setItem (Context aContext, Item aItem)
     {
         setText (aItem.getDescription ());
-        setIcon (aItem.getIconResourceId ());
+        setIcon (aItem.getInventoryDrawable (aContext));
     }
 }

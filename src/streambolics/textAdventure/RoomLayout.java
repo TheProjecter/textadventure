@@ -28,9 +28,11 @@ import streambolics.android.StandardTextView;
 import streambolics.android.StockAnimations;
 import streambolics.android.StockTransformations;
 import android.content.Context;
+import android.util.Log;
 
 public class RoomLayout extends CustomLayout
 {
+    private final String TAG = "RoomLayout";
     private WallButton _North;
     private WallButton _South;
     private WallButton _East;
@@ -41,11 +43,13 @@ public class RoomLayout extends CustomLayout
     private WallButton _SouthWest;
     private StandardTextView _Description;
     private InventoryView _Contents;
+    private int _GridSize = 32;
 
     public RoomLayout (Context aContext)
     {
         super (aContext);
 
+        _GridSize = StockDrawables.Floor (aContext).getIntrinsicHeight ();
         _North = new WallButton (aContext, StockAnimations.getApparateNorth (), new StraightWallDrawable (), null);
         addView (_North);
 
@@ -83,31 +87,35 @@ public class RoomLayout extends CustomLayout
     @Override
     protected void onLayout (boolean aChanged, int aL, int aT, int aR, int aB)
     {
-        int ww = 64;
+        int ww = _GridSize * 2;
         int width = aR - aL;
 
-        if (ww < width / 6)
-        {
-            ww = width / 6;
-        }
-        if (ww > width / 4)
-        {
-            ww = width / 4;
-        }
-
+        ww -= ww % _GridSize;
         int hh = (width - 2 * ww) / 2;
 
-        _NorthWest.layout (aL, aT, aL + ww, aT + ww);
-        _North.layout (aL + ww, aT, aR - ww, aT + ww);
-        _NorthEast.layout (aR - ww, aT, aR, aT + ww);
-        _West.layout (aL, aT + ww, aL + ww, aB - ww);
-        _East.layout (aR - ww, aT + ww, aR, aB - ww);
-        _SouthWest.layout (aL, aB - ww, aL + ww, aB);
-        _South.layout (aL + ww, aB - ww, aR - ww, aB);
-        _SouthEast.layout (aR - ww, aB - ww, aR, aB);
+        Log.d (TAG, "Width = " + Integer.toString (width));
+        Log.d (TAG, "ww = " + Integer.toString (ww));
 
-        _Description.layout (aL + ww, aT + ww, aR - ww, aT + ww + hh);
-        _Contents.layout (aL + ww, aT + ww + hh, aR - ww, aB - ww);
+        /*
+         * _NorthWest.layout (aL, aT, aL + ww, aT + ww); _North.layout (aL + ww,
+         * aT, aR - ww, aT + ww); _NorthEast.layout (aR - ww, aT, aR, aT + ww);
+         * _West.layout (aL, aT + ww, aL + ww, aB - ww); _East.layout (aR - ww,
+         * aT + ww, aR, aB - ww); _SouthWest.layout (aL, aB - ww, aL + ww, aB);
+         * _South.layout (aL + ww, aB - ww, aR - ww, aB); _SouthEast.layout (aR
+         * - ww, aB - ww, aR, aB);
+         */
+
+        _NorthWest.layout (0, 0, ww, ww);
+        _North.layout (ww, 0, width - ww, ww);
+        _NorthEast.layout (width - ww, 0, width, ww);
+        _West.layout (0, ww, ww, width - ww);
+        _East.layout (width - ww, ww, width, width - ww);
+        _SouthWest.layout (0, width - ww, ww, width);
+        _South.layout (ww, width - ww, width - ww, width);
+        _SouthEast.layout (width - ww, width - ww, width, width);
+
+        _Description.layout (ww, ww, width - ww, ww + hh);
+        _Contents.layout (ww, ww + hh, width - ww, width - ww);
     }
 
     public WallButton getNorthButton ()
@@ -160,4 +168,8 @@ public class RoomLayout extends CustomLayout
         return _Contents;
     }
 
+    public int getGridSize ()
+    {
+        return _GridSize;
+    }
 }

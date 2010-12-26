@@ -34,6 +34,8 @@ public class StockDrawables
     private static Drawable _Floor;
     private static Drawable _Floor1;
     private static Drawable _PitchBlack;
+    private static Drawable _Grass;
+    private static Drawable _Bush;
 
     private static SurroundedDrawable _TiledFloor;
 
@@ -89,6 +91,25 @@ public class StockDrawables
             _PitchBlack = aContext.getResources ().getDrawable (R.drawable.pitchblack);
         }
         return _PitchBlack;
+    }
+
+    public static Drawable Bush (Context aContext)
+    {
+        if (_Bush == null)
+        {
+            _Bush = aContext.getResources ().getDrawable (R.drawable.bush);
+        }
+        return _Bush;
+
+    }
+
+    public static Drawable Grass (Context aContext)
+    {
+        if (_Grass == null)
+        {
+            _Grass = aContext.getResources ().getDrawable (R.drawable.grass);
+        }
+        return _Grass;
     }
 
     public static Drawable TiledFloor (Context aContext)
