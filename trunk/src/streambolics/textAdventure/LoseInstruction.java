@@ -25,6 +25,11 @@ package streambolics.textAdventure;
 public class LoseInstruction extends MessageInstruction
 {
 
+    public LoseInstruction (Game aGame)
+    {
+        super (aGame);
+    }
+
     @Override
     public boolean run ()
     {

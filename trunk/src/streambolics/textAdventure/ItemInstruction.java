@@ -26,6 +26,11 @@ import streambolics.core.Tokenizer;
 
 public abstract class ItemInstruction extends Instruction
 {
+    public ItemInstruction (Game aGame)
+    {
+        super (aGame);
+    }
+
     private Item _Target;
     private String _PropName;
     private String _PropValue;

@@ -24,21 +24,15 @@ package streambolics.textAdventure;
 
 import streambolics.core.Tokenizer;
 
-public abstract class Instruction
+public abstract class Instruction extends GameObject
 {
-    private Game _Game;
+    public Instruction (Game aGame)
+    {
+        super (aGame);
+    }
 
     public abstract boolean run ();
 
     public abstract void parse (Tokenizer t);
 
-    public void setGame (Game aGame)
-    {
-        _Game = aGame;
-    }
-
-    public Game getGame ()
-    {
-        return _Game;
-    }
 }

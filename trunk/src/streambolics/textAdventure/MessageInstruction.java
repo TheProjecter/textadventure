@@ -26,6 +26,11 @@ import streambolics.core.Tokenizer;
 
 public abstract class MessageInstruction extends Instruction
 {
+    public MessageInstruction (Game aGame)
+    {
+        super (aGame);
+    }
+
     private String _Message;
 
     @Override

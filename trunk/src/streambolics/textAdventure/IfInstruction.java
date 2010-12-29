@@ -24,6 +24,11 @@ package streambolics.textAdventure;
 
 public class IfInstruction extends ItemInstruction
 {
+    public IfInstruction (Game aGame)
+    {
+        super (aGame);
+    }
+
     @Override
     public boolean run ()
     {

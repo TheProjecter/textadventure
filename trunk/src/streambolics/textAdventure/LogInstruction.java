@@ -25,10 +25,15 @@ package streambolics.textAdventure;
 public class LogInstruction extends MessageInstruction
 {
 
+    public LogInstruction (Game aGame)
+    {
+        super (aGame);
+    }
+
     @Override
     public boolean run ()
     {
-        getGame ().Log (getMessage ());
+        log (getMessage ());
         return true;
     }
 

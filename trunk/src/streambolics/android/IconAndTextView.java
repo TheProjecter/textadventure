@@ -25,10 +25,11 @@ package streambolics.android;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class IconAndTextView extends CustomLayout
+public class IconAndTextView extends CustomLayout implements View.OnClickListener
 {
     private final static String TAG = "IconAndTextView";
 
@@ -53,9 +54,11 @@ public class IconAndTextView extends CustomLayout
         _Text = new TextView (aContext);
         addView (_Text);
         setText (aText);
+        _Text.setOnClickListener (this);
         _Icon = new ImageView (aContext);
         addView (_Icon);
         setIcon (aIcon);
+        _Icon.setOnClickListener (this);
         _Height = aHeight;
     }
 
@@ -121,5 +124,10 @@ public class IconAndTextView extends CustomLayout
     public void setIcon (Drawable aDrawable)
     {
         _Icon.setImageDrawable (aDrawable);
+    }
+
+    @Override
+    public void onClick (View aView)
+    {
     }
 }

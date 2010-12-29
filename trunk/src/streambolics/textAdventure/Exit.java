@@ -27,23 +27,22 @@ import streambolics.core.Tokenizer;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
-public class Exit
+public class Exit extends GameObject
 {
-    private Game _Game;
     private Item _SourceRoom;
     private Item _DestinationRoom;
     private Item _Door;
 
     public Exit (Game aGame, Item aSourceRoom, Tokenizer t)
     {
-        _Game = aGame;
+        super (aGame);
         _SourceRoom = aSourceRoom;
         init (t);
     }
 
     public Exit (Game aGame, Item aSourceRoom, String d)
     {
-        _Game = aGame;
+        super (aGame);
         _SourceRoom = aSourceRoom;
         init (new Tokenizer (d));
     }
@@ -55,14 +54,14 @@ public class Exit
 
         if (k.equals ("->"))
         {
-            _Door = _Game.accessItem (d);
-            _DestinationRoom = _Game.accessItem (t.getWord ());
+            _Door = accessItem (d);
+            _DestinationRoom = accessItem (t.getWord ());
             _Door.setProbableTheme (_SourceRoom.getTheme ());
         }
         else
         {
             _Door = null;
-            _DestinationRoom = _Game.accessItem (d);
+            _DestinationRoom = accessItem (d);
         }
     }
 
@@ -102,15 +101,15 @@ public class Exit
         }
     }
 
-    public void operate (Logger aLogger)
+    public void operate ()
     {
         if (_Door == null)
         {
-            aLogger.Log ("Nothing happens");
+            log ("Nothing happens");
         }
         else
         {
-            _Door.operate (aLogger);
+            _Door.operate ();
         }
     }
 
@@ -118,11 +117,11 @@ public class Exit
     {
         if (_Door == null)
         {
-            aLogger.Log ("Nothing happens");
+            aLogger.log ("Nothing happens");
         }
         else
         {
-            _Door.operateWith (aItem, aLogger);
+            _Door.operateWith (aItem);
         }
     }
 

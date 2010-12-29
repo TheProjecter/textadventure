@@ -24,17 +24,29 @@ package streambolics.textAdventure;
 
 import streambolics.android.IconAndTextView;
 import android.content.Context;
+import android.view.View;
 
 public class ItemView extends IconAndTextView
 {
+    private Item _Item;
+
     public ItemView (Context aContext, Item aItem)
     {
         super (aContext, aItem.getInventoryDrawable (aContext), aItem.getDescription ());
+        _Item = aItem;
     }
 
     public void setItem (Context aContext, Item aItem)
     {
         setText (aItem.getDescription ());
         setIcon (aItem.getInventoryDrawable (aContext));
+        _Item = aItem;
+    }
+
+    @Override
+    public void onClick (View aView)
+    {
+        super.onClick (aView);
+        _Item.clicked ();
     }
 }

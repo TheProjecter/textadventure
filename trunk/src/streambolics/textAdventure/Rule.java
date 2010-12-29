@@ -27,9 +27,8 @@ import java.util.List;
 
 import streambolics.core.Tokenizer;
 
-public class Rule
+public class Rule extends GameObject
 {
-    private Game _Game;
     private Item _Item1;
     private Item _Item2;
     private Item _Item3;
@@ -37,8 +36,7 @@ public class Rule
 
     public Rule (Game aGame, Tokenizer aLine)
     {
-        super ();
-        _Game = aGame;
+        super (aGame);
         if (aLine.hasMore ())
         {
             _Item1 = aGame.accessItem (aLine.getWord ());
@@ -76,28 +74,27 @@ public class Rule
         Instruction i = null;
         if (cmd.equals ("IF"))
         {
-            i = new IfInstruction ();
+            i = new IfInstruction (getGame ());
         }
         else if (cmd.equals ("SET"))
         {
-            i = new SetInstruction ();
+            i = new SetInstruction (getGame ());
         }
         else if (cmd.equals ("SAY"))
         {
-            i = new LogInstruction ();
+            i = new LogInstruction (getGame ());
         }
         else if (cmd.equals ("WIN"))
         {
-            i = new WinInstruction ();
+            i = new WinInstruction (getGame ());
         }
         else if (cmd.equals ("LOSE"))
         {
-            i = new LoseInstruction ();
+            i = new LoseInstruction (getGame ());
         }
 
         if (i != null)
         {
-            i.setGame (_Game);
             i.parse (t);
             _Instructions.add (i);
         }
