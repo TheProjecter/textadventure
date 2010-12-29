@@ -1,8 +1,8 @@
-package streambolics.core;
+package streambolics.textAdventure;
 
 /*---------------------------------------------------------------------------------------------------
 
- Part of : Streambolics Core Functions
+ Part of : Text Adventure Creator
 
  Copyright (C) 2010-2011  Stephan Leclercq
 
@@ -22,7 +22,30 @@ package streambolics.core;
 
  ---------------------------------------------------------------------------------------------------*/
 
-public interface Logger
+import streambolics.core.Logger;
+
+public class GameObject implements Logger
 {
-    public void log (String aMessage);
+    private Game _Game;
+
+    public GameObject (Game aGame)
+    {
+        _Game = aGame;
+    }
+
+    protected Game getGame ()
+    {
+        return _Game;
+    }
+
+    protected Item accessItem (String aName)
+    {
+        return _Game.accessItem (aName);
+    }
+
+    @Override
+    public void log (String aMessage)
+    {
+        _Game.log (aMessage);
+    }
 }

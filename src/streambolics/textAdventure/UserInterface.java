@@ -1,8 +1,8 @@
-package streambolics.core;
+package streambolics.textAdventure;
 
 /*---------------------------------------------------------------------------------------------------
 
- Part of : Streambolics Core Functions
+ Part of : Text Adventure Creator
 
  Copyright (C) 2010-2011  Stephan Leclercq
 
@@ -22,7 +22,15 @@ package streambolics.core;
 
  ---------------------------------------------------------------------------------------------------*/
 
-public interface Logger
+import streambolics.core.Logger;
+
+public interface UserInterface extends Logger
 {
-    public void log (String aMessage);
+
+    void declareLoss (String aMessage);
+
+    void declareWin (String aMessage);
+
+    void itemClicked (Item aItem);
+
 }

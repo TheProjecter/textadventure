@@ -25,6 +25,11 @@ package streambolics.textAdventure;
 public class WinInstruction extends MessageInstruction
 {
 
+    public WinInstruction (Game aGame)
+    {
+        super (aGame);
+    }
+
     @Override
     public boolean run ()
     {

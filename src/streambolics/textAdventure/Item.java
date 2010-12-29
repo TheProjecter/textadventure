@@ -25,22 +25,21 @@ package streambolics.textAdventure;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-import streambolics.core.Logger;
 import streambolics.core.Tokenizer;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 /***
+ * A general item. Items are used throughout the application to represent all
+ * objects with which the player will interact, including the player itself,
+ * rooms, doors, and operable objects.
  * 
  * @author Stéphan Leclercq
  * 
- *         A general item.
- * 
  */
 
-public class Item implements ThemeProvider
+public class Item extends GameObject implements ThemeProvider
 {
-    private Game _Game;
     private String _Name;
     private String _Description;
     private Item _Container;
@@ -69,17 +68,37 @@ public class Item implements ThemeProvider
 
     public Item (Game aGame, String aName)
     {
+        super (aGame);
         _Name = aName;
-        _Game = aGame;
         _Description = "The game author did not provide a description for this";
         _Size = 1;
         _InnerSize = 9999;
         _OpeningSize = 9999;
     }
 
-    public String getName ()
+    /***
+     * Called when the item was clicked in a user interface.
+     */
+
+    public void clicked ()
     {
-        return _Name;
+        getGame ().itemClicked (this);
+    }
+
+    @Override
+    public Drawable getClosedDoorDrawable (Context aContext)
+    {
+        return getThemeProvider (aContext).getClosedDoorDrawable (aContext);
+    }
+
+    public int getContainedSize ()
+    {
+        return getGame ().getContainedSize (this);
+    }
+
+    public Item getContainer ()
+    {
+        return _Container;
     }
 
     public String getDescription ()
@@ -87,9 +106,161 @@ public class Item implements ThemeProvider
         return _Description;
     }
 
-    public boolean isOpen ()
+    public Exit getEastExit ()
     {
-        return _Open;
+        return _East;
+    }
+
+    @Override
+    public Drawable getFloorDrawable (Context aContext)
+    {
+        return getThemeProvider (aContext).getFloorDrawable (aContext);
+    }
+
+    @Override
+    public Drawable getInventoryDrawable (Context aContext)
+    {
+        return getThemeProvider (aContext).getInventoryDrawable (aContext);
+    }
+
+    public Item getKey ()
+    {
+        return _Key;
+    }
+
+    public int getLargestFitSize ()
+    {
+        return Math.min (_OpeningSize, getSizeLeft ());
+    }
+
+    public String getName ()
+    {
+        return _Name;
+    }
+
+    public String getNamedProperty (String aPropName)
+    {
+        if (aPropName.equals ("LOCATION"))
+        {
+            return _Container.getName ();
+        }
+        else if (aPropName.equals ("OPEN"))
+        {
+            return _Open ? "1" : "0";
+        }
+        else if (aPropName.equals ("LOCKED"))
+        {
+            return _Locked ? "1" : "0";
+        }
+        else if (aPropName.equals ("LIT"))
+        {
+            return _Lit ? "1" : "0";
+        }
+        else
+        {
+            return "";
+        }
+    }
+
+    public Exit getNorthEastExit ()
+    {
+        return _NorthEast;
+    }
+
+    public Exit getNorthExit ()
+    {
+        return _North;
+    }
+
+    public Exit getNorthWestExit ()
+    {
+        return _NorthWest;
+    }
+
+    @Override
+    public Drawable getOpenDoorDrawable (Context aContext)
+    {
+        return getThemeProvider (aContext).getOpenDoorDrawable (aContext);
+    }
+
+    /***
+     * The text to show in a menu when the object is used. The typical value is
+     * "use" but can be "open"/"close" for doors and containers, or "flip" for
+     * switches.
+     */
+
+    public String getOperateText ()
+    {
+        return "Use";
+    }
+
+    public int getSize ()
+    {
+        return _Size;
+    }
+
+    public int getSizeLeft ()
+    {
+        return _InnerSize - getContainedSize ();
+    }
+
+    public Exit getSouthEastExit ()
+    {
+        return _SouthEast;
+    }
+
+    public Exit getSouthExit ()
+    {
+        return _South;
+    }
+
+    public Exit getSouthWestExit ()
+    {
+        return _SouthWest;
+    }
+
+    /***
+     * Get the name of the theme.
+     * 
+     * @return The name of the theme, or a null string if it was never set.
+     */
+    public String getTheme ()
+    {
+        return _Theme;
+    }
+
+    private ThemeProvider getThemeProvider (Context aContext)
+    {
+        if (_ThemeProvider == null)
+        {
+            if (_Theme == null)
+            {
+                _Theme = "DEFAULT";
+            }
+            _ThemeProvider = StockThemes.getTheme (aContext, _Theme);
+        }
+        return _ThemeProvider;
+    }
+
+    @Override
+    public Drawable getWallDrawable (Context aContext)
+    {
+        return getThemeProvider (aContext).getWallDrawable (aContext);
+    }
+
+    public Exit getWestExit ()
+    {
+        return _West;
+    }
+
+    public boolean hasLight ()
+    {
+        return (_LightSource == null) || (_LightSource.isLit ());
+    }
+
+    public boolean isLit ()
+    {
+        return _Lit;
     }
 
     public boolean isLocked ()
@@ -97,9 +268,57 @@ public class Item implements ThemeProvider
         return _Locked;
     }
 
-    private void saveBool (BufferedWriter w, String n, boolean v) throws IOException
+    public boolean isOpen ()
     {
-        w.write ("  " + n + " " + (v ? "1" : "0") + "\n");
+        return _Open;
+    }
+
+    public void operate ()
+    {
+        // TODO : call rules here first
+        // TODO : only open/close if it has a meaning
+        _Open = !_Open;
+        reportOpen ();
+    }
+
+    public void operateWith (Item aItem)
+    {
+        // TODO : call rules here first
+        if (aItem == _Key)
+        {
+            _Locked = !_Locked;
+            reportLocked ();
+        }
+    }
+
+    public void parse (Tokenizer t)
+    {
+        String k = t.getWord ();
+        setNamedProperty (k, t.getRemainder ());
+    }
+
+    public void reportLocked ()
+    {
+        if (_Locked)
+        {
+            log (_Name + " is locked");
+        }
+        else
+        {
+            log (_Name + " is unlocked");
+        }
+    }
+
+    public void reportOpen ()
+    {
+        if (_Open)
+        {
+            log (_Name + " is open");
+        }
+        else
+        {
+            log (_Name + " is closed.");
+        }
     }
 
     public void Save (BufferedWriter w) throws IOException
@@ -114,113 +333,9 @@ public class Item implements ThemeProvider
         saveBool (w, "LIT", _Lit);
     }
 
-    public boolean hasLight ()
+    private void saveBool (BufferedWriter w, String n, boolean v) throws IOException
     {
-        return (_LightSource == null) || (_LightSource.isLit ());
-    }
-
-    public boolean isLit ()
-    {
-        return _Lit;
-    }
-
-    public void reportOpen (Logger aLogger)
-    {
-        if (_Open)
-        {
-            aLogger.Log (_Name + " is open");
-        }
-        else
-        {
-            aLogger.Log (_Name + " is closed.");
-        }
-    }
-
-    public void reportLocked (Logger aLogger)
-    {
-        if (_Locked)
-        {
-            aLogger.Log (_Name + " is locked");
-        }
-        else
-        {
-            aLogger.Log (_Name + " is unlocked");
-        }
-    }
-
-    public void operate (Logger aLogger)
-    {
-        _Open = !_Open;
-        reportOpen (aLogger);
-    }
-
-    public void operateWith (Item aItem, Logger aLogger)
-    {
-        if (aItem == _Key)
-        {
-            _Locked = !_Locked;
-            reportLocked (aLogger);
-        }
-    }
-
-    public void visitContents (ItemVisitor v)
-    {
-        _Game.visitChildren (this, v);
-    }
-
-    public int getContainedSize ()
-    {
-        return _Game.getContainedSize (this);
-    }
-
-    public int getSize ()
-    {
-        return _Size;
-    }
-
-    public int getSizeLeft ()
-    {
-        return _InnerSize - getContainedSize ();
-    }
-
-    public int getLargestFitSize ()
-    {
-        return Math.min (_OpeningSize, getSizeLeft ());
-    }
-
-    public boolean wouldFit (Item i)
-    {
-        return i.getSize () <= getLargestFitSize ();
-    }
-
-    public Exit getNorthExit ()
-    {
-        return _North;
-    }
-
-    public void setNorthExit (String d)
-    {
-        _North = new Exit (_Game, this, d);
-    }
-
-    public Exit getSouthExit ()
-    {
-        return _South;
-    }
-
-    public Exit getWestExit ()
-    {
-        return _West;
-    }
-
-    public Exit getEastExit ()
-    {
-        return _East;
-    }
-
-    public Item getContainer ()
-    {
-        return _Container;
+        w.write ("  " + n + " " + (v ? "1" : "0") + "\n");
     }
 
     public void setContainer (Item aContainer)
@@ -234,7 +349,12 @@ public class Item implements ThemeProvider
 
     public void setContainer (String aLocation)
     {
-        setContainer (_Game.accessItem (aLocation));
+        setContainer (accessItem (aLocation));
+    }
+
+    public void setDescription (String aDescription)
+    {
+        _Description = aDescription;
     }
 
     public void setNamedProperty (String aPropName, String aPropVal)
@@ -245,12 +365,12 @@ public class Item implements ThemeProvider
         }
         else if (aPropName.equals ("LIGHT"))
         {
-            _LightSource = _Game.accessItem (aPropVal);
+            _LightSource = accessItem (aPropVal);
             _LightSource.setProbableTheme ("LAMP");
         }
         else if (aPropName.equals ("KEY"))
         {
-            _Key = _Game.accessItem (aPropVal);
+            _Key = accessItem (aPropVal);
             _Key.setProbableTheme ("KEY");
         }
         else if (aPropName.equals ("ICON"))
@@ -280,131 +400,57 @@ public class Item implements ThemeProvider
         }
         else if (aPropName.equals ("NORTH"))
         {
-            _North = new Exit (_Game, this, aPropVal);
+            _North = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("SOUTH"))
         {
-            _South = new Exit (_Game, this, aPropVal);
+            _South = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("EAST"))
         {
-            _East = new Exit (_Game, this, aPropVal);
+            _East = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("WEST"))
         {
-            _West = new Exit (_Game, this, aPropVal);
+            _West = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("SOUTHWEST"))
         {
-            _SouthWest = new Exit (_Game, this, aPropVal);
+            _SouthWest = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("NORTHWEST"))
         {
-            _NorthWest = new Exit (_Game, this, aPropVal);
+            _NorthWest = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("SOUTHEAST"))
         {
-            _SouthEast = new Exit (_Game, this, aPropVal);
+            _SouthEast = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("NORTHEAST"))
         {
-            _NorthEast = new Exit (_Game, this, aPropVal);
+            _NorthEast = new Exit (getGame (), this, aPropVal);
         }
         else if (aPropName.equals ("BEUH"))
         {
         }
     }
 
-    public void parse (Tokenizer t)
+    public void setNorthExit (String d)
     {
-        String k = t.getWord ();
-        setNamedProperty (k, t.getRemainder ());
+        _North = new Exit (getGame (), this, d);
     }
 
-    public void setDescription (String aDescription)
-    {
-        _Description = aDescription;
-    }
-
-    public Exit getNorthWestExit ()
-    {
-        return _NorthWest;
-    }
-
-    public Exit getSouthEastExit ()
-    {
-        return _SouthEast;
-    }
-
-    public Exit getNorthEastExit ()
-    {
-        return _NorthEast;
-    }
-
-    public Exit getSouthWestExit ()
-    {
-        return _SouthWest;
-    }
-
-    public Item getKey ()
-    {
-        return _Key;
-    }
-
-    public int getIconResourceId ()
-    {
-        // TODO retrieve an icon based on IconName
-        return R.drawable.icon;
-    }
-
-    public String getNamedProperty (String aPropName)
-    {
-        if (aPropName.equals ("LOCATION"))
-        {
-            return _Container.getName ();
-        }
-        else if (aPropName.equals ("OPEN"))
-        {
-            return _Open ? "1" : "0";
-        }
-        else if (aPropName.equals ("LOCKED"))
-        {
-            return _Locked ? "1" : "0";
-        }
-        else if (aPropName.equals ("LIT"))
-        {
-            return _Lit ? "1" : "0";
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    private ThemeProvider getThemeProvider (Context aContext)
-    {
-        if (_ThemeProvider == null)
-        {
-            if (_Theme == null)
-            {
-                _Theme = "DEFAULT";
-            }
-            _ThemeProvider = StockThemes.getTheme (aContext, _Theme);
-        }
-        return _ThemeProvider;
-    }
-
-    private void setTheme (String aTheme)
-    {
-        _Theme = aTheme;
-        _ThemeProvider = null;
-    }
-
-    public String getTheme ()
-    {
-        return _Theme;
-    }
-
+    /***
+     * Sets the probable value for the theme. The probable value will not
+     * overwrite any other value, but may be overwritten by specific themes. The
+     * goal of the probable theme is to provide a default theme for items base
+     * on their usage. For example, if an item is referenced as a door to exit a
+     * room, the probable theme of the door is the same as the theme of the
+     * room.
+     * 
+     * @param aTheme
+     *            The probable theme.
+     */
     public void setProbableTheme (String aTheme)
     {
         if (_Theme == null)
@@ -413,34 +459,19 @@ public class Item implements ThemeProvider
         }
     }
 
-    @Override
-    public Drawable getFloorDrawable (Context aContext)
+    private void setTheme (String aTheme)
     {
-        return getThemeProvider (aContext).getFloorDrawable (aContext);
+        _Theme = aTheme;
+        _ThemeProvider = null;
     }
 
-    @Override
-    public Drawable getWallDrawable (Context aContext)
+    public void visitContents (ItemVisitor v)
     {
-        return getThemeProvider (aContext).getWallDrawable (aContext);
+        getGame ().visitChildren (this, v);
     }
 
-    @Override
-    public Drawable getOpenDoorDrawable (Context aContext)
+    public boolean wouldFit (Item i)
     {
-        return getThemeProvider (aContext).getOpenDoorDrawable (aContext);
+        return i.getSize () <= getLargestFitSize ();
     }
-
-    @Override
-    public Drawable getClosedDoorDrawable (Context aContext)
-    {
-        return getThemeProvider (aContext).getClosedDoorDrawable (aContext);
-    }
-
-    @Override
-    public Drawable getInventoryDrawable (Context aContext)
-    {
-        return getThemeProvider (aContext).getInventoryDrawable (aContext);
-    }
-
 }

@@ -29,14 +29,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import streambolics.core.Logger;
 import streambolics.core.Tokenizer;
 
-public class Game
+public class Game implements Logger
 {
     private HashMap<String, Item> _Items = new HashMap<String, Item> ();
     private List<Rule> _Rules = new ArrayList<Rule> ();
     private String _Description = "";
     private Item _Player;
+    private UserInterface _UserInterface;
+
+    public Game (UserInterface aUserInterface)
+    {
+        _UserInterface = aUserInterface;
+    }
 
     private void addDescription (String l)
     {
@@ -173,19 +180,23 @@ public class Game
         _Rules.add (r);
     }
 
-    public void Log (String aMessage)
+    public void log (String aMessage)
     {
-        // TODO Auto-generated method stub
+        _UserInterface.log (aMessage);
     }
 
     public void declareLoss (String aMessage)
     {
-        // TODO Auto-generated method stub
+        _UserInterface.declareLoss (aMessage);
     }
 
     public void declareWin (String aMessage)
     {
-        // TODO Auto-generated method stub
+        _UserInterface.declareWin (aMessage);
+    }
 
+    public void itemClicked (Item aItem)
+    {
+        _UserInterface.itemClicked (aItem);
     }
 }
