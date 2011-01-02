@@ -31,9 +31,15 @@ public class SetInstruction extends ItemInstruction
     }
 
     @Override
-    public boolean run ()
+    public boolean run () throws GameEngineException
     {
         getTarget ().setNamedProperty (getPropName (), getPropValue ());
+        return true;
+    }
+
+    @Override
+    public boolean isUseful ()
+    {
         return true;
     }
 

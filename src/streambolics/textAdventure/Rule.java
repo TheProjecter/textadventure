@@ -56,16 +56,26 @@ public class Rule extends GameObject
         return i == _Item1 || i == _Item2 || i == _Item3;
     }
 
-    public boolean run ()
+    public boolean run () throws GameEngineException
     {
+        boolean running = true;
+        boolean useful = false;
         for (Instruction i : _Instructions)
         {
-            if (!i.run ())
+            if (running)
             {
-                return false;
+                running = i.run ();
+                if (i.isUseful ())
+                {
+                    useful = true;
+                }
+            }
+            else
+            {
+                running = i.skip ();
             }
         }
-        return true;
+        return useful;
     }
 
     public void parse (Tokenizer t)

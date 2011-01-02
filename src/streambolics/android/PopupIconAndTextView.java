@@ -1,8 +1,8 @@
-package streambolics.textAdventure;
+package streambolics.android;
 
 /*---------------------------------------------------------------------------------------------------
 
- Part of : Text Adventure Creator
+ Part of : Generic tools for Android
 
  Copyright (C) 2010-2011  Stephan Leclercq
 
@@ -22,28 +22,31 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.view.View;
 
-public class SaveVisitor implements ItemVisitor
+public class PopupIconAndTextView extends IconAndTextView
 {
-    private BufferedWriter _Writer;
 
-    public SaveVisitor (BufferedWriter aWriter)
+    private PopupMenu _PopupMenu;
+    private OnClickListener _Action;
+
+    public PopupIconAndTextView (Context aContext, Drawable aIcon, String aText, PopupMenu aPopupMenu, OnClickListener aAction)
     {
-        _Writer = aWriter;
+        super (aContext, aIcon, aText);
+        _PopupMenu = aPopupMenu;
+        _Action = aAction;
     }
 
     @Override
-    public void visit (Item i)
+    public void onClick (View aView)
     {
-        try
+        super.onClick (aView);
+        _PopupMenu.dismiss ();
+        if (_Action != null)
         {
-            i.save (_Writer);
-        }
-        catch (IOException e)
-        {
+            _Action.onClick (aView);
         }
     }
-
 }

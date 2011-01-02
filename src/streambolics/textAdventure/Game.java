@@ -82,7 +82,7 @@ public class Game implements Logger
     {
         if (_Player == null)
         {
-            _Player = accessItem ("Player");
+            _Player = accessItem (Item.PLAYER_NAME);
         }
         return _Player;
     }
@@ -125,7 +125,7 @@ public class Game implements Logger
         return a.getSize ();
     }
 
-    public void parse (BufferedReader r) throws IOException
+    public void parse (BufferedReader r) throws IOException, GameEngineException
     {
         String s;
         Item i = null;
@@ -198,5 +198,17 @@ public class Game implements Logger
     public void itemClicked (Item aItem)
     {
         _UserInterface.itemClicked (aItem);
+    }
+
+    public void verify () throws GameEngineException
+    {
+        for (Item i : _Items.values ())
+        {
+            if (!i.hasDescription ())
+            {
+                throw new GameEngineException (i.getName () + " does not have a description");
+            }
+
+        }
     }
 }

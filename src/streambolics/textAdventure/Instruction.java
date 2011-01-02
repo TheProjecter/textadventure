@@ -31,8 +31,18 @@ public abstract class Instruction extends GameObject
         super (aGame);
     }
 
-    public abstract boolean run ();
+    public abstract boolean run () throws GameEngineException;
+
+    public boolean skip ()
+    {
+        return false;
+    }
 
     public abstract void parse (Tokenizer t);
+
+    public boolean isUseful ()
+    {
+        return false;
+    }
 
 }

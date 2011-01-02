@@ -22,16 +22,22 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-import streambolics.core.Logger;
 import streambolics.core.Tokenizer;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 public class Exit extends GameObject
 {
+    private static final String LOGTAG = "Exit";
     private Item _SourceRoom;
     private Item _DestinationRoom;
     private Item _Door;
+
+    private void debug (String aMessage)
+    {
+        Log.d (LOGTAG, aMessage);
+    }
 
     public Exit (Game aGame, Item aSourceRoom, Tokenizer t)
     {
@@ -51,23 +57,33 @@ public class Exit extends GameObject
     {
         String d = t.getWord ();
         String k = t.getWord ();
+        _SourceRoom.setProbableTheme ("ROOM");
+        _SourceRoom.makeProbableContainer ();
 
         if (k.equals ("->"))
         {
             _Door = accessItem (d);
             _DestinationRoom = accessItem (t.getWord ());
             _Door.setProbableTheme (_SourceRoom.getTheme ());
+            _Door.makeProbableContainer ();
         }
         else
         {
             _Door = null;
             _DestinationRoom = accessItem (d);
         }
+        _DestinationRoom.setProbableTheme (_SourceRoom.getTheme ());
+        _DestinationRoom.makeProbableContainer ();
     }
 
     public boolean isVisible ()
     {
         return _SourceRoom.hasLight () || (isOpen () && _DestinationRoom.hasLight ());
+    }
+
+    public boolean isConcealed ()
+    {
+        return _Door != null && _Door.isConcealed ();
     }
 
     public boolean isOpen ()
@@ -103,24 +119,17 @@ public class Exit extends GameObject
 
     public void operate ()
     {
-        if (_Door == null)
-        {
-            log ("Nothing happens");
-        }
-        else
+        if (_Door != null)
         {
             _Door.operate ();
         }
     }
 
-    public void operateWith (Item aItem, Logger aLogger)
+    public void operateWith (Item aItem)
     {
-        if (_Door == null)
+        if (_Door != null)
         {
-            aLogger.log ("Nothing happens");
-        }
-        else
-        {
+            debug ("Trying key: " + aItem.getName ());
             _Door.operateWith (aItem);
         }
     }
@@ -176,5 +185,18 @@ public class Exit extends GameObject
         {
             return _Door.getClosedDoorDrawable (aContext);
         }
+    }
+
+    public boolean wouldAccomodate (Item aItem)
+    {
+        if (_Door != null && !_Door.wouldAccomodateNow (aItem))
+        {
+            return false;
+        }
+        if (!aItem.wouldExit (_SourceRoom) || !aItem.wouldEnter (_DestinationRoom))
+        {
+            return false;
+        }
+        return true;
     }
 }

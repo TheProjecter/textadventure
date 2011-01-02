@@ -24,15 +24,12 @@ package streambolics.android;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 public class IconAndTextView extends CustomLayout implements View.OnClickListener
 {
-    private final static String TAG = "IconAndTextView";
-
     private TextView _Text;
     private ImageView _Icon;
     private int _Height;
@@ -54,6 +51,7 @@ public class IconAndTextView extends CustomLayout implements View.OnClickListene
         _Text = new TextView (aContext);
         addView (_Text);
         setText (aText);
+        _Text.setId (444719);
         _Text.setOnClickListener (this);
         _Icon = new ImageView (aContext);
         addView (_Icon);
@@ -65,18 +63,21 @@ public class IconAndTextView extends CustomLayout implements View.OnClickListene
     @Override
     protected void onLayout (boolean aChanged, int aL, int aT, int aR, int aB)
     {
-        _Icon.layout (aL, aT, aL + _Height, aT + _Height);
-        _Text.layout (aL + _Height, aT, aR, aB);
+        _Icon.layout (0, 0, _Height, _Height);
+        _Text.layout (_Height, 0, aR - aL, aB - aT);
     }
 
     @Override
     protected void onMeasure (int aWidthMeasureSpec, int aHeightMeasureSpec)
     {
-        Log.d (TAG, "onMeasure " + Integer.toString (aWidthMeasureSpec) + "-" + Integer.toString (aHeightMeasureSpec));
+        // debug ("onMeasure " + Integer.toString (aWidthMeasureSpec) + "-" +
+        // Integer.toString (aHeightMeasureSpec));
         _Icon.measure (aWidthMeasureSpec, aHeightMeasureSpec);
         _Text.measure (aWidthMeasureSpec, aHeightMeasureSpec);
 
-        Log.d (TAG, "setMeasuredDimension " + Integer.toString (measureWidth (aWidthMeasureSpec)) + "-" + Integer.toString (measureHeight (aHeightMeasureSpec)));
+        // debug ("setMeasuredDimension " + Integer.toString (measureWidth
+        // (aWidthMeasureSpec)) + "-" + Integer.toString (measureHeight
+        // (aHeightMeasureSpec)));
         setMeasuredDimension (measureWidth (aWidthMeasureSpec), measureHeight (aHeightMeasureSpec));
     }
 
@@ -124,6 +125,11 @@ public class IconAndTextView extends CustomLayout implements View.OnClickListene
     public void setIcon (Drawable aDrawable)
     {
         _Icon.setImageDrawable (aDrawable);
+    }
+
+    public void setTextColor (int aColor)
+    {
+        _Text.setTextColor (aColor);
     }
 
     @Override

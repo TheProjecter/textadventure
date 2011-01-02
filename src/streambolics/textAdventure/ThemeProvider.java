@@ -14,4 +14,6 @@ public interface ThemeProvider
     public Drawable getClosedDoorDrawable (Context aContext);
 
     public Drawable getInventoryDrawable (Context aContext);
+
+    public int getTextColor (Context aContext);
 }

@@ -22,28 +22,16 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-
-public class SaveVisitor implements ItemVisitor
+@SuppressWarnings("serial")
+public class GameEngineException extends Exception
 {
-    private BufferedWriter _Writer;
-
-    public SaveVisitor (BufferedWriter aWriter)
+    public GameEngineException (String aReason)
     {
-        _Writer = aWriter;
+        super (aReason);
     }
 
-    @Override
-    public void visit (Item i)
+    public GameEngineException (String aReason, Exception aInner)
     {
-        try
-        {
-            i.save (_Writer);
-        }
-        catch (IOException e)
-        {
-        }
+        super (aReason, aInner);
     }
-
 }

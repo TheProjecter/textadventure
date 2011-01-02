@@ -22,32 +22,50 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
+import streambolics.android.CustomLayout;
 import streambolics.android.StandardListView;
 import android.content.Context;
 
-public class InventoryView extends StandardListView implements ItemVisitor
+public class InventoryView extends CustomLayout implements ItemVisitor
 {
-    ItemListViewAdapter _Adapter;
+    private ItemListViewAdapter _Adapter;
+    private FloorDrawable _Background;
+    private StandardListView _CurrentView;
 
     public InventoryView (Context aContext)
     {
         super (aContext);
         _Adapter = new ItemListViewAdapter (aContext);
-        setAdapter (_Adapter);
+        _Background = new FloorDrawable (null);
     }
 
-    public void setContainer (Item aContainer)
+    private void createNewViewSinceOldWillNotUpdate ()
     {
+        if (_CurrentView != null)
+        {
+            _CurrentView.setAdapter (null);
+            removeView (_CurrentView);
+        }
+
+        _CurrentView = new StandardListView (getContext ());
+        _CurrentView.setDividerHeight (0);
+        addView (_CurrentView);
+    }
+
+    public void setContainer (Item aContainer, ThemeProvider aTheme)
+    {
+        _Adapter.setTheme (aTheme);
+        createNewViewSinceOldWillNotUpdate ();
+        _Background.setFloor (aTheme.getFloorDrawable (getContext ()));
+
         _Adapter.clear ();
         if (aContainer.hasLight ())
         {
-            setBackgroundDrawable (StockDrawables.TiledFloor (getContext ()));
             aContainer.visitContents (this);
         }
-        else
-        {
-            setBackgroundDrawable (StockDrawables.PitchBlack (getContext ()));
-        }
+        _CurrentView.setBackgroundDrawable (_Background);
+        _CurrentView.setAdapter (_Adapter);
+        _CurrentView.layout (0, 0, getWidth (), getHeight ());
     }
 
     @Override
@@ -58,5 +76,14 @@ public class InventoryView extends StandardListView implements ItemVisitor
             return;
         }
         _Adapter.add (aItem);
+    }
+
+    @Override
+    protected void onLayout (boolean aChanged, int aL, int aT, int aR, int aB)
+    {
+        if (_CurrentView != null)
+        {
+            _CurrentView.layout (0, 0, aR - aL, aB - aT);
+        }
     }
 }
