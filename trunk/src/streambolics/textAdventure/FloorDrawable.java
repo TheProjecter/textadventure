@@ -22,28 +22,23 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import streambolics.android.SurroundedDrawable;
+import android.graphics.drawable.Drawable;
 
-public class SaveVisitor implements ItemVisitor
+public class FloorDrawable extends SurroundedDrawable
 {
-    private BufferedWriter _Writer;
-
-    public SaveVisitor (BufferedWriter aWriter)
+    public FloorDrawable (Drawable aCenter)
     {
-        _Writer = aWriter;
+        super (aCenter);
     }
 
-    @Override
-    public void visit (Item i)
+    public void setFloor (Drawable aFloor)
     {
-        try
-        {
-            i.save (_Writer);
-        }
-        catch (IOException e)
-        {
-        }
+        setCenter (aFloor);
+        setLeft (aFloor);
+        setRight (aFloor);
+        setBelow (aFloor);
+        setBelowLeft (aFloor);
+        setBelowRight (aFloor);
     }
-
 }

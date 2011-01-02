@@ -1,9 +1,9 @@
 ; The player is initially in the hall,
 ; He can carry up to 6 units of items.
 
-%Player
+%Player Yourself
   LOCATION Hall
-  CANCONTAIN 6
+  INNERSIZE 6
   
 %Key Large key with wooden handle
   LOCATION SmallRoom
@@ -19,7 +19,7 @@
 ; It requires the key to be unlocked and opened.
   
 %Door Large wooden door
-  LOCKED 1
+  LOCKED TRUE
   KEY Key
   
 %Hall A large hall
@@ -29,6 +29,8 @@
 
 %Stairs Stairs
   ICON Stairs
+  LOCKED TRUE
+  KEY SmallKey
   
 %Terrace A terrace
   WEST Stairs -> Hall
@@ -53,19 +55,34 @@
   SIZE 6
   
 %Switch A light switch
-  SIZE 99999
+  FIXED TRUE
   LOCATION Hall
   
 %Zizogen A Zizogen
   LOCATION Player
   
-%%Switch
-  IF Lamp LIT 1
-  SET Lamp LIT 0
-  EXIT
+%Stuff1 Stuff 1
+  LOCATION Player
   
+%Stuff2 Stuff 2
+  LOCATION Player
+  
+%Stuff3 Stuff 3
+  LOCATION Player
+  
+%Stuff4 Stuff 4
+  LOCATION Player
+  
+%Stuff5 Stuff 5
+  LOCATION Player
+  
+%Lamp A lamp
+
 %%Switch
-  SET LAMP LIT 1
+  IF Lamp LIT TRUE
+  SET Lamp LIT FALSE
+  ELSE
+  SET LAMP LIT TRUE
   
 %%Hall
   IF Treasure LOCATION Player

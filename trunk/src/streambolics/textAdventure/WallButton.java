@@ -71,6 +71,11 @@ public class WallButton extends Button
         _WallDrawable.setFloor (StockDrawables.PitchBlack (getContext ()));
         _WallDrawable.setWall (StockDrawables.PitchBlack (getContext ()));
         _WallDrawable.setDoor (StockDrawables.PitchBlack (getContext ()));
+        if (_Rotator != null)
+        {
+            _Rotator.flush ();
+        }
+        invalidate ();
     }
 
     private void setDoor (Item aRoom, Exit aExit, Item aDoor)
@@ -84,6 +89,12 @@ public class WallButton extends Button
         {
             _WallDrawable.setWall (aExit.getWallDrawable (getContext ()));
             _WallDrawable.setDoor (aExit.getOpenDoorDrawable (getContext ()));
+        }
+        else if (aDoor.isConcealed ())
+        {
+            _WallDrawable.setWall (aExit.getWallDrawable (getContext ()));
+            _WallDrawable.setDoor (aExit.getWallDrawable (getContext ()));
+            setEnabled (false);
         }
         else
         {
@@ -115,4 +126,5 @@ public class WallButton extends Button
         }
         invalidate ();
     }
+
 }

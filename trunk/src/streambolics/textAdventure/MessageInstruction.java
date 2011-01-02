@@ -43,4 +43,10 @@ public abstract class MessageInstruction extends Instruction
     {
         return _Message;
     }
+
+    @Override
+    public boolean isUseful ()
+    {
+        return true;
+    }
 }

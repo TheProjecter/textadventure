@@ -22,28 +22,17 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-
-public class SaveVisitor implements ItemVisitor
+public class IfNotInstruction extends IfInstruction
 {
-    private BufferedWriter _Writer;
 
-    public SaveVisitor (BufferedWriter aWriter)
+    public IfNotInstruction (Game aGame)
     {
-        _Writer = aWriter;
+        super (aGame);
     }
 
     @Override
-    public void visit (Item i)
+    public boolean run ()
     {
-        try
-        {
-            i.save (_Writer);
-        }
-        catch (IOException e)
-        {
-        }
+        return !super.run ();
     }
-
 }

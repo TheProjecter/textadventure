@@ -22,27 +22,27 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
 public class ItemListViewAdapter extends ArrayAdapter<Item>
 {
+    private final static String LOGTAG = "ItemListViewAdapter";
     private Context _Context;
+    private ThemeProvider _Theme;
 
     public ItemListViewAdapter (Context aContext)
     {
-        super (aContext, 0);
+        super (aContext, 444719);
         _Context = aContext;
     }
 
     @Override
     public View getView (int aPosition, View aConvertView, ViewGroup aParent)
     {
-
         ItemView v;
         Item itm = getItem (aPosition);
         if (aConvertView != null)
@@ -53,22 +53,27 @@ public class ItemListViewAdapter extends ArrayAdapter<Item>
         else
         {
             v = new ItemView (_Context, itm);
-            // aParent.addView (v);
         }
 
+        v.setTheme (_Theme);
         return v;
     }
 
-    protected void Debug (String aMessage)
+    @Override
+    public boolean hasStableIds ()
     {
-        new AlertDialog.Builder (_Context).setTitle ("ItemListViewAdapter").setMessage (aMessage)
-                .setNeutralButton ("Continue", new DialogInterface.OnClickListener ()
-                {
-                    @Override
-                    public void onClick (DialogInterface dialog, int which)
-                    {
-                    }
-                }).show ();
+        return false;
+    }
+
+    @SuppressWarnings("unused")
+    private void debug (String aMessage)
+    {
+        Log.d (LOGTAG, aMessage);
+    }
+
+    public void setTheme (ThemeProvider aTheme)
+    {
+        _Theme = aTheme;
     }
 
 }

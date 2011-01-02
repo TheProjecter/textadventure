@@ -25,6 +25,7 @@ package streambolics.android;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -38,6 +39,11 @@ import android.view.ViewGroup;
 public abstract class CustomLayout extends ViewGroup
 {
     private Context _Context;
+
+    protected void debug (String aMessage)
+    {
+        Log.d (getClass ().getSimpleName (), aMessage);
+    }
 
     public CustomLayout (Context aContext)
     {

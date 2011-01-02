@@ -49,4 +49,14 @@ public class ItemView extends IconAndTextView
         super.onClick (aView);
         _Item.clicked ();
     }
+
+    public Item getItem ()
+    {
+        return _Item;
+    }
+
+    public void setTheme (ThemeProvider aTheme)
+    {
+        setTextColor (aTheme.getTextColor (getContext ()));
+    }
 }

@@ -3,6 +3,7 @@ package streambolics.textAdventure;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.graphics.Color;
 
 public class StockThemes
 {
@@ -35,13 +36,14 @@ public class StockThemes
         {
             return;
         }
-        _Default = new StaticTheme (StockDrawables.Floor (aContext), StockDrawables.Floor (aContext), StockDrawables.Wall (aContext),
-                StockDrawables.OpenDoor (aContext), StockDrawables.ClosedDoor (aContext));
-        _Themes.put ("ROOM", _Default);
+        _Default = new StaticTheme (StockDrawables.PitchBlack (aContext), StockDrawables.PitchBlack (aContext), StockDrawables.PitchBlack (aContext),
+                StockDrawables.PitchBlack (aContext), StockDrawables.PitchBlack (aContext), Color.GRAY);
+        _Themes.put (
+                "ROOM",
+                new StaticTheme (StockDrawables.Floor (aContext), StockDrawables.Floor (aContext), StockDrawables.Wall (aContext), StockDrawables
+                        .OpenDoor (aContext), StockDrawables.ClosedDoor (aContext), Color.BLACK));
         _Themes.put ("KEY", new StaticTheme (R.drawable.key, aContext));
         _Themes.put ("GARDEN", new StaticTheme (StockDrawables.Grass (aContext), StockDrawables.Grass (aContext), StockDrawables.Bush (aContext),
-                StockDrawables.Grass (aContext), StockDrawables.Bush (aContext)
-
-        ));
+                StockDrawables.Grass (aContext), StockDrawables.Bush (aContext), Color.BLACK));
     }
 }

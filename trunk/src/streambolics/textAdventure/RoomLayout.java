@@ -23,16 +23,13 @@ package streambolics.textAdventure;
  ---------------------------------------------------------------------------------------------------*/
 
 import streambolics.android.CustomLayout;
-import streambolics.android.SizeProxyDrawable;
 import streambolics.android.StandardTextView;
 import streambolics.android.StockAnimations;
 import streambolics.android.StockTransformations;
 import android.content.Context;
-import android.util.Log;
 
 public class RoomLayout extends CustomLayout
 {
-    private final String TAG = "RoomLayout";
     private WallButton _North;
     private WallButton _South;
     private WallButton _East;
@@ -75,9 +72,6 @@ public class RoomLayout extends CustomLayout
         addView (_SouthWest);
 
         _Description = new StandardTextView (aContext);
-        SizeProxyDrawable b = new SizeProxyDrawable ();
-        b.setProxyed (StockDrawables.TiledFloor (getContext ()));
-        _Description.setBackgroundDrawable (b);
         addView (_Description);
 
         _Contents = new InventoryView (aContext);
@@ -93,17 +87,8 @@ public class RoomLayout extends CustomLayout
         ww -= ww % _GridSize;
         int hh = (width - 2 * ww) / 2;
 
-        Log.d (TAG, "Width = " + Integer.toString (width));
-        Log.d (TAG, "ww = " + Integer.toString (ww));
-
-        /*
-         * _NorthWest.layout (aL, aT, aL + ww, aT + ww); _North.layout (aL + ww,
-         * aT, aR - ww, aT + ww); _NorthEast.layout (aR - ww, aT, aR, aT + ww);
-         * _West.layout (aL, aT + ww, aL + ww, aB - ww); _East.layout (aR - ww,
-         * aT + ww, aR, aB - ww); _SouthWest.layout (aL, aB - ww, aL + ww, aB);
-         * _South.layout (aL + ww, aB - ww, aR - ww, aB); _SouthEast.layout (aR
-         * - ww, aB - ww, aR, aB);
-         */
+        // debug ("Width = " + Integer.toString (width));
+        // debug ("ww = " + Integer.toString (ww));
 
         _NorthWest.layout (0, 0, ww, ww);
         _North.layout (ww, 0, width - ww, ww);
