@@ -25,6 +25,7 @@ package streambolics.textAdventure;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
+import streambolics.core.FieldParser;
 import streambolics.core.Tokenizer;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -87,16 +88,6 @@ public class Item extends GameObject implements ThemeProvider
         {
             _IsPlayer = true;
         }
-
-    }
-
-    public void makeProbableContainer ()
-    {
-        if (_InnerSize < 0 && _OpeningSize < 0)
-        {
-            _InnerSize = 9999;
-            _OpeningSize = 9999;
-        }
     }
 
     /***
@@ -106,6 +97,11 @@ public class Item extends GameObject implements ThemeProvider
     public void clicked ()
     {
         getGame ().itemClicked (this);
+    }
+
+    private void debug (String aMessage)
+    {
+        Log.d (LOGTAG, aMessage);
     }
 
     @Override
@@ -129,15 +125,25 @@ public class Item extends GameObject implements ThemeProvider
         return _Description;
     }
 
-    public Exit getEastExit ()
+    public Exit getEast ()
     {
         return _East;
+    }
+
+    public FieldParser<Item> getFieldParser (String aName) throws GameEngineException
+    {
+        return getGame ().getItemFieldParser (aName);
     }
 
     @Override
     public Drawable getFloorDrawable (Context aContext)
     {
         return getThemeProvider (aContext).getFloorDrawable (aContext);
+    }
+
+    public int getInnerSize ()
+    {
+        return _InnerSize;
     }
 
     @Override
@@ -166,41 +172,22 @@ public class Item extends GameObject implements ThemeProvider
         return _Name;
     }
 
-    public String getNamedProperty (String aPropName)
+    public String getNamedProperty (String aPropName) throws GameEngineException
     {
-        if (aPropName.equals ("LOCATION"))
-        {
-            return _Container.getName ();
-        }
-        else if (aPropName.equals ("OPEN"))
-        {
-            return _Open ? "1" : "0";
-        }
-        else if (aPropName.equals ("LOCKED"))
-        {
-            return _Locked ? "1" : "0";
-        }
-        else if (aPropName.equals ("LIT"))
-        {
-            return _Lit ? "1" : "0";
-        }
-        else
-        {
-            return "";
-        }
+        return getFieldParser (aPropName).getValue (this);
     }
 
-    public Exit getNorthEastExit ()
-    {
-        return _NorthEast;
-    }
-
-    public Exit getNorthExit ()
+    public Exit getNorth ()
     {
         return _North;
     }
 
-    public Exit getNorthWestExit ()
+    public Exit getNorthEast ()
+    {
+        return _NorthEast;
+    }
+
+    public Exit getNorthWest ()
     {
         return _NorthWest;
     }
@@ -252,19 +239,25 @@ public class Item extends GameObject implements ThemeProvider
         return _InnerSize - getContainedSize ();
     }
 
-    public Exit getSouthEastExit ()
-    {
-        return _SouthEast;
-    }
-
-    public Exit getSouthExit ()
+    public Exit getSouth ()
     {
         return _South;
     }
 
-    public Exit getSouthWestExit ()
+    public Exit getSouthEast ()
+    {
+        return _SouthEast;
+    }
+
+    public Exit getSouthWest ()
     {
         return _SouthWest;
+    }
+
+    @Override
+    public int getTextColor (Context aContext)
+    {
+        return getThemeProvider (aContext).getTextColor (aContext);
     }
 
     /***
@@ -296,7 +289,7 @@ public class Item extends GameObject implements ThemeProvider
         return getThemeProvider (aContext).getWallDrawable (aContext);
     }
 
-    public Exit getWestExit ()
+    public Exit getWest ()
     {
         return _West;
     }
@@ -309,6 +302,16 @@ public class Item extends GameObject implements ThemeProvider
     public boolean hasLight ()
     {
         return (_LightSource == null) || (_LightSource.isLit ());
+    }
+
+    public boolean isConcealed ()
+    {
+        return _Concealed;
+    }
+
+    public boolean isFixed ()
+    {
+        return _Fixed;
     }
 
     public boolean isLit ()
@@ -326,6 +329,56 @@ public class Item extends GameObject implements ThemeProvider
         return _Open;
     }
 
+    public Item getLightSource ()
+    {
+        return _LightSource;
+    }
+
+    public void setLightSource (Item aLightSource)
+    {
+        _LightSource = aLightSource;
+    }
+
+    public void setNorth (Exit aNorth)
+    {
+        _North = aNorth;
+    }
+
+    public void setSouth (Exit aSouth)
+    {
+        _South = aSouth;
+    }
+
+    public void setEast (Exit aEast)
+    {
+        _East = aEast;
+    }
+
+    public void setWest (Exit aWest)
+    {
+        _West = aWest;
+    }
+
+    public void setNorthWest (Exit aNorthWest)
+    {
+        _NorthWest = aNorthWest;
+    }
+
+    public void setSouthWest (Exit aSouthWest)
+    {
+        _SouthWest = aSouthWest;
+    }
+
+    public void setNorthEast (Exit aNorthEast)
+    {
+        _NorthEast = aNorthEast;
+    }
+
+    public void setSouthEast (Exit aSouthEast)
+    {
+        _SouthEast = aSouthEast;
+    }
+
     private boolean isOpenable ()
     {
         return _OpeningSize > 0;
@@ -336,9 +389,24 @@ public class Item extends GameObject implements ThemeProvider
         return _IsPlayer;
     }
 
-    public void operate ()
+    public void makeProbableContainer ()
     {
-        // TODO : call rules here first
+        if (_InnerSize < 0)
+        {
+            _InnerSize = 9999;
+        }
+        if (_OpeningSize < 0)
+        {
+            _OpeningSize = _InnerSize;
+        }
+    }
+
+    public void operate () throws GameEngineException
+    {
+        if (getGame ().applyRules (Rule.Type.OPERATE, this, null))
+        {
+            return;
+        }
         if (isOpenable ())
         {
             if (isLocked ())
@@ -353,15 +421,14 @@ public class Item extends GameObject implements ThemeProvider
         }
     }
 
-    private void debug (String aMessage)
+    public void operateWith (Item aItem) throws GameEngineException
     {
-        Log.d (LOGTAG, aMessage);
-    }
-
-    public void operateWith (Item aItem)
-    {
-        // TODO : call rules here first
         debug ("Trying tool " + aItem.getName () + " on " + _Name);
+
+        if (getGame ().applyRules (Rule.Type.USEON, aItem, this))
+        {
+            return;
+        }
         if (aItem == _Key)
         {
             _Locked = !_Locked;
@@ -418,16 +485,9 @@ public class Item extends GameObject implements ThemeProvider
         w.write ("  " + n + " " + Boolean.toString (v) + "\n");
     }
 
-    @Override
-    public String toString ()
+    public void setConcealed (boolean aConcealed)
     {
-        debug ("Who is silly enough to call toString? Item=" + _Name);
-        return _Name;
-    }
-
-    public boolean isConcealed ()
-    {
-        return _Concealed;
+        _Concealed = aConcealed;
     }
 
     public void setContainer (Item aContainer)
@@ -436,6 +496,10 @@ public class Item extends GameObject implements ThemeProvider
         {
             _Container = aContainer;
             // TODO : Report the fact that the item has moved.
+            if (aContainer != null)
+            {
+                aContainer.makeProbableContainer ();
+            }
         }
     }
 
@@ -449,106 +513,54 @@ public class Item extends GameObject implements ThemeProvider
         _Description = aDescription;
     }
 
+    public void setFixed (boolean aFixed)
+    {
+        _Fixed = aFixed;
+    }
+
+    public void setInnerSize (int aInnerSize)
+    {
+        _InnerSize = aInnerSize;
+    }
+
+    public void setKey (Item aKey)
+    {
+        _Key = aKey;
+    }
+
+    public void setLit (boolean aLit)
+    {
+        _Lit = aLit;
+    }
+
+    public void setLocked (boolean aLocked)
+    {
+        _Locked = aLocked;
+    }
+
+    public void setName (String aName)
+    {
+        _Name = aName;
+    }
+
     public void setNamedProperty (String aPropName, String aPropVal) throws GameEngineException
     {
-        try
-        {
-            if (aPropName.equals ("LOCATION"))
-            {
-                setContainer (aPropVal);
-            }
-            else if (aPropName.equals ("LIGHT"))
-            {
-                _LightSource = accessItem (aPropVal);
-                _LightSource.setProbableTheme ("LAMP");
-            }
-            else if (aPropName.equals ("KEY"))
-            {
-                _Key = accessItem (aPropVal);
-                _Key.setProbableTheme ("KEY");
-            }
-            else if (aPropName.equals ("ICON"))
-            {
-                setTheme (aPropVal);
-            }
-            else if (aPropName.equals ("OPEN"))
-            {
-                _Open = Boolean.parseBoolean (aPropVal);
-            }
-            else if (aPropName.equals ("LOCKED"))
-            {
-                _Locked = Boolean.parseBoolean (aPropVal);
-            }
-            else if (aPropName.equals ("LIT"))
-            {
-                _Lit = Boolean.parseBoolean (aPropVal);
-            }
-            else if (aPropName.equals ("FIXED"))
-            {
-                _Fixed = Boolean.parseBoolean (aPropVal);
-            }
-            else if (aPropName.equals ("CONCEALED"))
-            {
-                _Concealed = Boolean.parseBoolean (aPropVal);
-            }
-            else if (aPropName.equals ("SIZE"))
-            {
-                _Size = Integer.parseInt (aPropVal);
-            }
-            else if (aPropName.equals ("INNERSIZE"))
-            {
-                _InnerSize = Integer.parseInt (aPropVal);
-            }
-            else if (aPropName.equals ("OPENINGSIZE"))
-            {
-                _OpeningSize = Integer.parseInt (aPropVal);
-            }
-            else if (aPropName.equals ("NORTH"))
-            {
-                _North = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("SOUTH"))
-            {
-                _South = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("EAST"))
-            {
-                _East = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("WEST"))
-            {
-                _West = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("SOUTHWEST"))
-            {
-                _SouthWest = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("NORTHWEST"))
-            {
-                _NorthWest = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("SOUTHEAST"))
-            {
-                _SouthEast = new Exit (getGame (), this, aPropVal);
-            }
-            else if (aPropName.equals ("NORTHEAST"))
-            {
-                _NorthEast = new Exit (getGame (), this, aPropVal);
-            }
-            else
-            {
-                throw new Exception ("Invalid property name " + aPropName);
-            }
-        }
-        catch (Exception e)
-        {
-            throw new GameEngineException ("Unable to set property " + aPropName + " to " + aPropVal, e);
-        }
+        getFieldParser (aPropName).setValue (this, aPropVal);
     }
 
     public void setNorthExit (String d)
     {
         _North = new Exit (getGame (), this, d);
+    }
+
+    public void setOpen (boolean aOpen)
+    {
+        _Open = aOpen;
+    }
+
+    public void setOpeningSize (int aOpeningSize)
+    {
+        _OpeningSize = aOpeningSize;
     }
 
     /***
@@ -570,10 +582,22 @@ public class Item extends GameObject implements ThemeProvider
         }
     }
 
-    private void setTheme (String aTheme)
+    public void setSize (int aSize)
+    {
+        _Size = aSize;
+    }
+
+    void setTheme (String aTheme)
     {
         _Theme = aTheme;
         _ThemeProvider = null;
+    }
+
+    @Override
+    public String toString ()
+    {
+        debug ("Who is silly enough to call toString? Item=" + _Name);
+        return _Name;
     }
 
     public boolean tryTransferTo (Item aContainer)
@@ -645,11 +669,5 @@ public class Item extends GameObject implements ThemeProvider
     public boolean wouldExit (Item aContainer)
     {
         return (aContainer == null || aContainer.getOpeningSize () >= getSize ());
-    }
-
-    @Override
-    public int getTextColor (Context aContext)
-    {
-        return getThemeProvider (aContext).getTextColor (aContext);
     }
 }

@@ -22,7 +22,7 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-public class SetInstruction extends ItemInstruction
+public class SetInstruction extends ItemFieldValueInstruction
 {
 
     public SetInstruction (Game aGame)
@@ -33,7 +33,7 @@ public class SetInstruction extends ItemInstruction
     @Override
     public boolean run () throws GameEngineException
     {
-        getTarget ().setNamedProperty (getPropName (), getPropValue ());
+        getParser ().setValue (getTarget (), getValue ());
         return true;
     }
 

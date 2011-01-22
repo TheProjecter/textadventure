@@ -117,7 +117,7 @@ public class Exit extends GameObject
         }
     }
 
-    public void operate ()
+    public void operate () throws GameEngineException
     {
         if (_Door != null)
         {
@@ -125,7 +125,7 @@ public class Exit extends GameObject
         }
     }
 
-    public void operateWith (Item aItem)
+    public void operateWith (Item aItem) throws GameEngineException
     {
         if (_Door != null)
         {

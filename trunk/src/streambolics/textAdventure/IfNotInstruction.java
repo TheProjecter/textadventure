@@ -31,7 +31,7 @@ public class IfNotInstruction extends IfInstruction
     }
 
     @Override
-    public boolean run ()
+    public boolean run () throws GameEngineException
     {
         return !super.run ();
     }

@@ -31,14 +31,37 @@ public abstract class Instruction extends GameObject
         super (aGame);
     }
 
+    /***
+     * Executes the instruction.
+     * 
+     * @return true if execution must continue with the next instruction. false
+     *         if subsequent instructions in the rule must be skipped.
+     * 
+     * @throws GameEngineException
+     */
+
     public abstract boolean run () throws GameEngineException;
+
+    /***
+     * Skips the instruction, and optionally ends the skipping.
+     * 
+     * @return true if following instructions should be executed. false if
+     *         following instructions must still be skipped.
+     */
 
     public boolean skip ()
     {
         return false;
     }
 
-    public abstract void parse (Tokenizer t);
+    public abstract void parse (Tokenizer t) throws GameEngineException;
+
+    /***
+     * Whether this instruction was useful in doing something.
+     * 
+     * @return true if the instruction actually changes something in the game
+     *         when run. false if the instruction is merely a control structure.
+     */
 
     public boolean isUseful ()
     {

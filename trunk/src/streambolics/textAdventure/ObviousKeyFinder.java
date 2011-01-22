@@ -25,17 +25,19 @@ package streambolics.textAdventure;
 public class ObviousKeyFinder extends ObviousItemFinder
 {
     private Item _Door;
+    private Game _Game;
 
     public ObviousKeyFinder (Game aGame, Item aDoor)
     {
         _Door = aDoor;
+        _Game = aGame;
     }
 
     @Override
     protected boolean itemFits (Item i)
     {
         // TODO : Enumerate the scriptlets to see if one is ok.
-        return _Door != null && i == _Door.getKey ();
+        return _Door != null && (i == _Door.getKey () || _Game.AnyRuleApplies (Rule.Type.USEON, i, _Door));
     }
 
 }

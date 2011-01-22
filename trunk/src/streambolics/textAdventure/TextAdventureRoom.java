@@ -88,6 +88,14 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
     private Item _CurrentItem;
     private PopupMenu _CurrentPopupMenu;
     private boolean _ActionAttempted;
+    private boolean _Lost;
+    private boolean _Won;
+    private Object _EndMessage;
+
+    public void attemptAction ()
+    {
+        _ActionAttempted = true;
+    }
 
     private void clearEvents ()
     {
@@ -101,16 +109,42 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
         }
     }
 
+    private void debug (String aMessage)
+    {
+        Log.d (LOGTAG, aMessage);
+    }
+
+    private boolean isFinished ()
+    {
+        return _EndMessage != null;
+    }
+
+    private void setEndMessage (String aMsg1, String aMsg2)
+    {
+        log (aMsg1);
+        log (aMsg2);
+        if (aMsg1 != null && aMsg1.length () > 0)
+        {
+            _EndMessage = aMsg1;
+        }
+        else
+        {
+            _EndMessage = aMsg2;
+        }
+    }
+
     @Override
     public void declareLoss (String aMessage)
     {
-        // TODO Auto-generated method stub
+        setEndMessage (aMessage, "You Lose");
+        _Lost = true;
     }
 
     @Override
     public void declareWin (String aMessage)
     {
-        // TODO Auto-generated method stub
+        setEndMessage (aMessage, "You win");
+        _Won = true;
     }
 
     private void describeExit (Exit aExit, WallButton aButton)
@@ -134,31 +168,35 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
         }
     }
 
-    public void attemptAction ()
-    {
-        _ActionAttempted = true;
-    }
-
     private void describeRoom ()
     {
+        if (_CurrentRoom == null)
+        {
+            _CurrentRoom = _Game.accessItem ("?EmptyRoom?");
+        }
+        try
+        {
+            _Game.applyRules (Rule.Type.INSIDE, _CurrentRoom, null);
+        }
+        catch (GameEngineException e)
+        {
+            displayException ("Unable do describe room", e);
+        }
+
         if (_ActionAttempted && Text_Events.getText ().toString ().trim ().equals (""))
         {
             log ("Nothing happens");
         }
         _ActionAttempted = false;
-        if (_CurrentRoom == null)
-        {
-            _CurrentRoom = _Game.accessItem ("?EmptyRoom?");
-        }
 
-        describeExit (_CurrentRoom.getNorthExit (), Button_North);
-        describeExit (_CurrentRoom.getSouthExit (), Button_South);
-        describeExit (_CurrentRoom.getEastExit (), Button_East);
-        describeExit (_CurrentRoom.getWestExit (), Button_West);
-        describeExit (_CurrentRoom.getNorthWestExit (), Button_NorthWest);
-        describeExit (_CurrentRoom.getSouthEastExit (), Button_SouthEast);
-        describeExit (_CurrentRoom.getNorthEastExit (), Button_NorthEast);
-        describeExit (_CurrentRoom.getSouthWestExit (), Button_SouthWest);
+        describeExit (_CurrentRoom.getNorth (), Button_North);
+        describeExit (_CurrentRoom.getSouth (), Button_South);
+        describeExit (_CurrentRoom.getEast (), Button_East);
+        describeExit (_CurrentRoom.getWest (), Button_West);
+        describeExit (_CurrentRoom.getNorthWest (), Button_NorthWest);
+        describeExit (_CurrentRoom.getSouthEast (), Button_SouthEast);
+        describeExit (_CurrentRoom.getNorthEast (), Button_NorthEast);
+        describeExit (_CurrentRoom.getSouthWest (), Button_SouthWest);
 
         _LastRoom = _CurrentRoom;
         ThemeProvider t;
@@ -181,6 +219,27 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
         Text_Contents.setContainer (_CurrentRoom, t);
     }
 
+    public void displayError (String aAction, String aError)
+    {
+        // TODO : Move this method to StandardActivity
+
+        new AlertDialog.Builder (this).setTitle (aAction).setMessage (aError).setNeutralButton ("OK", new DialogInterface.OnClickListener ()
+        {
+            @Override
+            public void onClick (DialogInterface dialog, int which)
+            {
+                // TODO : exit the application ???
+            }
+        }).show ();
+    }
+
+    public void displayException (String aAction, Exception e)
+    {
+        // TODO : Move this method to StandardActivity
+
+        displayError (aAction, e.getMessage ());
+    }
+
     private void exitSelected (Exit aExit, int slidex, int slidey)
     {
         clearEvents ();
@@ -194,6 +253,16 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
         }
     }
 
+    private void flushCurrentItem ()
+    {
+        if (_CurrentPopupMenu != null)
+        {
+            _CurrentPopupMenu.dismiss ();
+        }
+        _CurrentPopupMenu = null;
+        _CurrentItem = null;
+    }
+
     private Item getObviousKey (Exit e)
     {
         Item door = e.getDoor ();
@@ -201,7 +270,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
         {
             return null;
         }
-        Item key = door.getKey ();
+        Item key = _Game.getObviousKey (door);
         if (key == null)
         {
             return null;
@@ -231,10 +300,17 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
 
         if (_CurrentTool != null)
         {
-            attemptAction ();
-            if (aItem != null)
+            try
             {
-                aItem.operateWith (_CurrentTool);
+                attemptAction ();
+                if (aItem != null)
+                {
+                    aItem.operateWith (_CurrentTool);
+                }
+            }
+            catch (Exception e)
+            {
+                displayException ("Error while using object", e);
             }
             _CurrentTool = null;
             describeRoom ();
@@ -249,21 +325,28 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
 
             // TODO : Set the title of the popup menu
 
-            _CurrentPopupMenu.addEntry (StockDrawables.Wall (this), aItem.getOperateText (), new View.OnClickListener ()
+            _CurrentPopupMenu.addEntry (getResources ().getDrawable (R.drawable.use), aItem.getOperateText (), new View.OnClickListener ()
             {
                 @Override
                 public void onClick (View aView)
                 {
                     if (_CurrentItem != null)
                     {
-                        attemptAction ();
-                        _CurrentItem.operate ();
+                        try
+                        {
+                            attemptAction ();
+                            _CurrentItem.operate ();
+                        }
+                        catch (Exception e)
+                        {
+                            displayException ("Can't operate", e);
+                        }
                     }
                     flushCurrentItem ();
                     describeRoom ();
                 }
             });
-            _CurrentPopupMenu.addEntry (StockDrawables.OpenDoor (this), "Use it on something", new View.OnClickListener ()
+            _CurrentPopupMenu.addEntry (getResources ().getDrawable (R.drawable.operateon), "Use it on something", new View.OnClickListener ()
             {
                 @Override
                 public void onClick (View aView)
@@ -281,7 +364,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             });
             if (aItem.getContainer () == _Player)
             {
-                _CurrentPopupMenu.addEntry (StockDrawables.ClosedDoor (this), "Drop it here", new View.OnClickListener ()
+                _CurrentPopupMenu.addEntry (getResources ().getDrawable (R.drawable.drop), "Drop it here", new View.OnClickListener ()
                 {
                     @Override
                     public void onClick (View aView)
@@ -297,7 +380,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             }
             else
             {
-                _CurrentPopupMenu.addEntry (StockDrawables.ClosedDoor (this), "Carry it", new View.OnClickListener ()
+                _CurrentPopupMenu.addEntry (getResources ().getDrawable (R.drawable.carry), "Carry it", new View.OnClickListener ()
                 {
                     @Override
                     public void onClick (View aView)
@@ -311,7 +394,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
                     }
                 });
             }
-            _CurrentPopupMenu.addEntry (StockDrawables.OpenDoor (this), "Ooops! Nothing", new View.OnClickListener ()
+            _CurrentPopupMenu.addEntry (getResources ().getDrawable (R.drawable.cancel), "Ooops! Nothing", new View.OnClickListener ()
             {
                 @Override
                 public void onClick (View aView)
@@ -328,16 +411,6 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
 
             _CurrentPopupMenu.show (Text_Room);
         }
-    }
-
-    private void flushCurrentItem ()
-    {
-        if (_CurrentPopupMenu != null)
-        {
-            _CurrentPopupMenu.dismiss ();
-        }
-        _CurrentPopupMenu = null;
-        _CurrentItem = null;
     }
 
     private void loadFile (String aFileName)
@@ -409,30 +482,14 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
         }
     }
 
-    public void displayError (String aAction, String aError)
-    {
-        // TODO : Move this method to StandardActivity
-
-        new AlertDialog.Builder (this).setTitle (aAction).setMessage (aError).setNeutralButton ("OK", new DialogInterface.OnClickListener ()
-        {
-            @Override
-            public void onClick (DialogInterface dialog, int which)
-            {
-                // TODO : exit the application ???
-            }
-        }).show ();
-    }
-
-    public void displayException (String aAction, Exception e)
-    {
-        // TODO : Move this method to StandardActivity
-
-        displayError (aAction, e.getMessage ());
-    }
-
     @Override
     public void log (String aMessage)
     {
+        if (isFinished ())
+        {
+            return;
+        }
+
         String s = Text_Events.getText ().toString ().trim ();
         if (s.equals (""))
         {
@@ -548,7 +605,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getNorthExit (), 0, 1);
+                exitSelected (_CurrentRoom.getNorth (), 0, 1);
             }
         });
 
@@ -557,7 +614,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getSouthExit (), 0, -1);
+                exitSelected (_CurrentRoom.getSouth (), 0, -1);
             }
         });
 
@@ -566,7 +623,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getEastExit (), -1, 0);
+                exitSelected (_CurrentRoom.getEast (), -1, 0);
             }
         });
 
@@ -575,7 +632,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getWestExit (), 1, 0);
+                exitSelected (_CurrentRoom.getWest (), 1, 0);
             }
         });
 
@@ -584,7 +641,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getSouthEastExit (), -1, -1);
+                exitSelected (_CurrentRoom.getSouthEast (), -1, -1);
             }
         });
         Button_NorthWest.setOnClickListener (new View.OnClickListener ()
@@ -592,7 +649,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getNorthWestExit (), 1, 1);
+                exitSelected (_CurrentRoom.getNorthWest (), 1, 1);
             }
         });
         Button_SouthWest.setOnClickListener (new View.OnClickListener ()
@@ -600,7 +657,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getSouthWestExit (), 1, -1);
+                exitSelected (_CurrentRoom.getSouthWest (), 1, -1);
             }
         });
         Button_NorthEast.setOnClickListener (new View.OnClickListener ()
@@ -608,7 +665,7 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
             @Override
             public void onClick (View v)
             {
-                exitSelected (_CurrentRoom.getNorthEastExit (), -1, 1);
+                exitSelected (_CurrentRoom.getNorthEast (), -1, 1);
             }
         });
 
@@ -625,7 +682,11 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
     public void onPause ()
     {
         super.onPause ();
-        saveSave ("Autosave");
+        if (!isFinished ())
+        {
+            // TODO : This will not work when rotating...
+            saveSave ("Autosave");
+        }
     }
 
     private void proposeOpenExit (Exit aExit, Item aKey, String aProposition)
@@ -702,34 +763,36 @@ public class TextAdventureRoom extends Activity implements Logger, UserInterface
 
     private void unlockExitAndGo ()
     {
-        if (_CurrentExit.isLocked () && _CurrentTool != null)
+        try
         {
-            _CurrentExit.operateWith (_CurrentTool);
+            if (_CurrentExit.isLocked () && _CurrentTool != null)
+            {
+                _CurrentExit.operateWith (_CurrentTool);
+            }
+            _CurrentTool = null;
+            if (_CurrentExit.isLocked ())
+            {
+                log ("The door will not unlock");
+                return;
+            }
+
+            if (!_CurrentExit.isOpen ())
+            {
+                _CurrentExit.operate ();
+            }
+
+            if (!_CurrentExit.isOpen ())
+            {
+                log ("The door will not open");
+                return;
+            }
+
+            slideOutOfRoom ();
         }
-        _CurrentTool = null;
-        if (_CurrentExit.isLocked ())
+        catch (Exception e)
         {
-            log ("The door will not unlock");
-            return;
+            displayException ("Error while exiting room", e);
         }
-
-        if (!_CurrentExit.isOpen ())
-        {
-            _CurrentExit.operate ();
-        }
-
-        if (!_CurrentExit.isOpen ())
-        {
-            log ("The door will not open");
-            return;
-        }
-
-        slideOutOfRoom ();
-    }
-
-    private void debug (String aMessage)
-    {
-        Log.d (LOGTAG, aMessage);
     }
 
 }

@@ -117,7 +117,7 @@ public class WallButton extends Button
         {
             setText (aExit.getDescription ());
             setEnabled (true);
-            _WallDrawable.setFloor (aExit.getFloorDrawable (getContext ()));
+            _WallDrawable.setFloor (aRoom.getFloorDrawable (getContext ()));
             setDoor (aRoom, aExit, aExit.getDoor ());
         }
         if (_Rotator != null)
