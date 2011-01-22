@@ -22,7 +22,7 @@ package streambolics.textAdventure;
 
  ---------------------------------------------------------------------------------------------------*/
 
-public class IfInstruction extends ItemInstruction
+public class IfInstruction extends ItemFieldValueInstruction
 {
     public IfInstruction (Game aGame)
     {
@@ -30,9 +30,9 @@ public class IfInstruction extends ItemInstruction
     }
 
     @Override
-    public boolean run ()
+    public boolean run () throws GameEngineException
     {
-        return getTarget ().getNamedProperty (getPropName ()).equals (getPropValue ());
+        return getParser ().isValue (getTarget (), getValue ());
     }
 
 }

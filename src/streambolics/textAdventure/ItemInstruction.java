@@ -32,28 +32,15 @@ public abstract class ItemInstruction extends Instruction
     }
 
     private Item _Target;
-    private String _PropName;
-    private String _PropValue;
 
     @Override
-    public void parse (Tokenizer t)
+    public void parse (Tokenizer t) throws GameEngineException
     {
-        // TODO Auto-generated method stub
-
+        _Target = getGame ().accessItem (t.getWord ());
     }
 
     protected Item getTarget ()
     {
         return _Target;
-    }
-
-    protected String getPropName ()
-    {
-        return _PropName;
-    }
-
-    protected String getPropValue ()
-    {
-        return _PropValue;
     }
 }

@@ -29,11 +29,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import streambolics.core.BooleanFieldParser;
+import streambolics.core.FieldParser;
+import streambolics.core.IntegerFieldParser;
 import streambolics.core.Logger;
 import streambolics.core.Tokenizer;
+import android.util.Log;
 
 public class Game implements Logger
 {
+    private final String LOGTAG = "Game";
+    private HashMap<String, FieldParser<Item>> _ItemParsers = new HashMap<String, FieldParser<Item>> ();
+
     private HashMap<String, Item> _Items = new HashMap<String, Item> ();
     private List<Rule> _Rules = new ArrayList<Rule> ();
     private String _Description = "";
@@ -43,11 +50,6 @@ public class Game implements Logger
     public Game (UserInterface aUserInterface)
     {
         _UserInterface = aUserInterface;
-    }
-
-    private void addDescription (String l)
-    {
-        _Description = (_Description + '\n' + l).trim ();
     }
 
     public Item accessItem (String aName)
@@ -78,37 +80,371 @@ public class Game implements Logger
         return i;
     }
 
-    public Item getPlayer ()
+    private void addDescription (String l)
     {
-        if (_Player == null)
-        {
-            _Player = accessItem (Item.PLAYER_NAME);
-        }
-        return _Player;
+        _Description = (_Description + '\n' + l).trim ();
     }
 
-    public void visitChildren (Item aContainer, ItemVisitor aVisitor)
+    public void addRule (Rule r)
     {
-        for (Item i : _Items.values ())
+        Log.d (LOGTAG, "Rule added");
+        _Rules.add (r);
+    }
+
+    public boolean applyRules (Rule.Type aType, Item aItem1, Item aItem2) throws GameEngineException
+    {
+        for (Rule r : _Rules)
         {
-            if (i.getContainer () == aContainer)
+            if (r.apply (aType, aItem1, aItem2))
             {
-                aVisitor.visit (i);
+                return true;
             }
         }
+        return false;
     }
 
-    public void visitAll (ItemVisitor aVisitor)
+    public boolean AnyRuleApplies (Rule.Type aType, Item aItem1, Item aItem2)
     {
-        for (Item i : _Items.values ())
+        for (Rule r : _Rules)
         {
-            aVisitor.visit (i);
+            if (r.appliesTo (aType, aItem1, aItem2))
+            {
+                return true;
+            }
         }
+        return false;
     }
 
-    public void visitPlayerInventory (ItemVisitor aVisitor)
+    private FieldParser<Item> computeItemFieldParser (String aName) throws GameEngineException
     {
-        visitChildren (getPlayer (), aVisitor);
+        if (aName.equals ("OPEN"))
+        {
+            return new BooleanFieldParser<Item> ()
+            {
+                @Override
+                protected boolean getConvertedValue (Item aObject)
+                {
+                    return aObject.isOpen ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, boolean aValue)
+                {
+                    aObject.setOpen (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("LOCATION"))
+        {
+            return new ItemFieldParser (this)
+            {
+                @Override
+                protected Item getConvertedValue (Item aObject)
+                {
+                    return aObject.getContainer ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, Item aValue)
+                {
+                    aObject.setContainer (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("LIGHT"))
+        {
+            return new ItemFieldParser (this)
+            {
+                @Override
+                protected Item getConvertedValue (Item aObject)
+                {
+                    return aObject.getLightSource ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, Item aValue)
+                {
+                    aObject.setLightSource (aValue);
+                    aValue.setProbableTheme ("LAMP");
+                }
+            };
+        }
+        else if (aName.equals ("KEY"))
+        {
+            return new ItemFieldParser (this)
+            {
+                @Override
+                protected Item getConvertedValue (Item aObject)
+                {
+                    return aObject.getKey ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, Item aValue)
+                {
+                    aObject.setKey (aValue);
+                    aValue.setProbableTheme ("KEY");
+                }
+            };
+        }
+        else if (aName.equals ("ICON"))
+        {
+            return new FieldParser<Item> ()
+            {
+                @Override
+                public void setValue (Item aObject, String aValue)
+                {
+                    aObject.setTheme (aValue);
+                }
+
+                @Override
+                public String getValue (Item aObject)
+                {
+                    return aObject.getTheme ();
+                }
+            };
+        }
+        else if (aName.equals ("LOCKED"))
+        {
+            return new BooleanFieldParser<Item> ()
+            {
+                @Override
+                protected boolean getConvertedValue (Item aObject)
+                {
+                    return aObject.isLocked ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, boolean aValue)
+                {
+                    aObject.setLocked (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("LIT"))
+        {
+            return new BooleanFieldParser<Item> ()
+            {
+                @Override
+                protected boolean getConvertedValue (Item aObject)
+                {
+                    return aObject.isLit ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, boolean aValue)
+                {
+                    aObject.setLit (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("FIXED"))
+        {
+            return new BooleanFieldParser<Item> ()
+            {
+                @Override
+                protected boolean getConvertedValue (Item aObject)
+                {
+                    return aObject.isFixed ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, boolean aValue)
+                {
+                    aObject.setFixed (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("CONCEALED"))
+        {
+            return new BooleanFieldParser<Item> ()
+            {
+                @Override
+                protected boolean getConvertedValue (Item aObject)
+                {
+                    return aObject.isConcealed ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, boolean aValue)
+                {
+                    aObject.setConcealed (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("SIZE"))
+        {
+            return new IntegerFieldParser<Item> ()
+            {
+                @Override
+                protected int getConvertedValue (Item aObject)
+                {
+                    return aObject.getSize ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, int aValue)
+                {
+                    aObject.setSize (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("INNERSIZE"))
+        {
+            return new IntegerFieldParser<Item> ()
+            {
+                @Override
+                protected int getConvertedValue (Item aObject)
+                {
+                    return aObject.getInnerSize ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, int aValue)
+                {
+                    aObject.setInnerSize (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("OPENINGSIZE"))
+        {
+            return new IntegerFieldParser<Item> ()
+            {
+                @Override
+                protected int getConvertedValue (Item aObject)
+                {
+                    return aObject.getOpeningSize ();
+                }
+
+                @Override
+                protected void setConvertedValue (Item aObject, int aValue)
+                {
+                    aObject.setOpeningSize (aValue);
+                }
+            };
+        }
+        else if (aName.equals ("NORTH"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setNorth (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("SOUTH"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setSouth (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("EAST"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setEast (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("WEST"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setWest (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("SOUTHWEST"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setSouthWest (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("NORTHWEST"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setNorthWest (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("SOUTHEAST"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setSouthEast (aExit);
+                }
+            };
+        }
+        else if (aName.equals ("NORTHEAST"))
+        {
+            return new ExitFieldParser ()
+            {
+                @Override
+                protected void setExit (Item aObject, Exit aExit)
+                {
+                    aObject.setNorthEast (aExit);
+                }
+            };
+        }
+
+        throw new GameEngineException ("Invalid Item property name " + aName);
+    }
+
+    public void declareLoss (String aMessage)
+    {
+        _UserInterface.declareLoss (aMessage);
+    }
+
+    public void declareWin (String aMessage)
+    {
+        _UserInterface.declareWin (aMessage);
+    }
+
+    public int getContainedSize (Item aContainer)
+    {
+        ItemSizeAdder a = new ItemSizeAdder ();
+        visitChildren (aContainer, a);
+        return a.getSize ();
+    }
+
+    public FieldParser<Item> getItemFieldParser (String aName) throws GameEngineException
+    {
+        aName = aName.toUpperCase ();
+        if (_ItemParsers.containsKey (aName))
+        {
+            return _ItemParsers.get (aName);
+        }
+        else
+        {
+            FieldParser<Item> p = computeItemFieldParser (aName);
+            _ItemParsers.put (aName, p);
+            return p;
+        }
     }
 
     public Item getObviousKey (Item aDoor)
@@ -118,11 +454,24 @@ public class Game implements Logger
         return f.getFoundItem ();
     }
 
-    public int getContainedSize (Item aContainer)
+    public Item getPlayer ()
     {
-        ItemSizeAdder a = new ItemSizeAdder ();
-        visitChildren (aContainer, a);
-        return a.getSize ();
+        if (_Player == null)
+        {
+            _Player = accessItem (Item.PLAYER_NAME);
+            _Player.makeProbableContainer ();
+        }
+        return _Player;
+    }
+
+    public void itemClicked (Item aItem)
+    {
+        _UserInterface.itemClicked (aItem);
+    }
+
+    public void log (String aMessage)
+    {
+        _UserInterface.log (aMessage);
     }
 
     public void parse (BufferedReader r) throws IOException, GameEngineException
@@ -142,6 +491,7 @@ public class Game implements Logger
                 t.getFixed (2);
                 i = null;
                 rule = new Rule (this, t);
+                addRule (rule);
             }
             else if (s.startsWith ("%"))
             {
@@ -175,31 +525,6 @@ public class Game implements Logger
         visitAll (v);
     }
 
-    public void addRule (Rule r)
-    {
-        _Rules.add (r);
-    }
-
-    public void log (String aMessage)
-    {
-        _UserInterface.log (aMessage);
-    }
-
-    public void declareLoss (String aMessage)
-    {
-        _UserInterface.declareLoss (aMessage);
-    }
-
-    public void declareWin (String aMessage)
-    {
-        _UserInterface.declareWin (aMessage);
-    }
-
-    public void itemClicked (Item aItem)
-    {
-        _UserInterface.itemClicked (aItem);
-    }
-
     public void verify () throws GameEngineException
     {
         for (Item i : _Items.values ())
@@ -210,5 +535,29 @@ public class Game implements Logger
             }
 
         }
+    }
+
+    public void visitAll (ItemVisitor aVisitor)
+    {
+        for (Item i : _Items.values ())
+        {
+            aVisitor.visit (i);
+        }
+    }
+
+    public void visitChildren (Item aContainer, ItemVisitor aVisitor)
+    {
+        for (Item i : _Items.values ())
+        {
+            if (i.getContainer () == aContainer)
+            {
+                aVisitor.visit (i);
+            }
+        }
+    }
+
+    public void visitPlayerInventory (ItemVisitor aVisitor)
+    {
+        visitChildren (getPlayer (), aVisitor);
     }
 }

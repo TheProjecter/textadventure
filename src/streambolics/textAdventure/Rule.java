@@ -26,17 +26,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 import streambolics.core.Tokenizer;
+import android.util.Log;
 
 public class Rule extends GameObject
 {
+    public enum Type
+    {
+        ALWAYS, INSIDE, REMOVE, ADD, USEON, OPERATE
+    };
+
+    private final String LOGTAG = "Rule";
+    private Type _Type;
     private Item _Item1;
     private Item _Item2;
-    private Item _Item3;
     private List<Instruction> _Instructions = new ArrayList<Instruction> ();
 
-    public Rule (Game aGame, Tokenizer aLine)
+    private static Type parseType (String aType) throws GameEngineException
+    {
+        aType = aType.toUpperCase ();
+        if (aType.equals ("ALWAYS"))
+        {
+            return Type.ALWAYS;
+        }
+        else if (aType.equals ("INSIDE"))
+        {
+            return Type.INSIDE;
+        }
+        else if (aType.equals ("REMOVE"))
+        {
+            return Type.REMOVE;
+        }
+        else if (aType.equals ("ADD"))
+        {
+            return Type.ADD;
+        }
+        else if (aType.equals ("USEON"))
+        {
+            return Type.USEON;
+        }
+        else if (aType.equals ("OPERATE"))
+        {
+            return Type.OPERATE;
+        }
+
+        throw new GameEngineException ("Unknown rule type " + aType);
+    }
+
+    public Rule (Game aGame, Tokenizer aLine) throws GameEngineException
     {
         super (aGame);
+
+        _Type = parseType (aLine.getWord ());
+
         if (aLine.hasMore ())
         {
             _Item1 = aGame.accessItem (aLine.getWord ());
@@ -45,16 +86,27 @@ public class Rule extends GameObject
         {
             _Item2 = aGame.accessItem (aLine.getWord ());
         }
-        if (aLine.hasMore ())
-        {
-            _Item3 = aGame.accessItem (aLine.getWord ());
-        }
     }
 
-    public boolean hasItem (Item i)
+    public boolean appliesTo (Type aType, Item aItem1, Item aItem2)
     {
-        return i == _Item1 || i == _Item2 || i == _Item3;
+        return _Type == aType && _Item1 == aItem1 & _Item2 == aItem2;
     }
+
+    public boolean apply (Type aType, Item aItem1, Item aItem2) throws GameEngineException
+    {
+        Log.d (LOGTAG, "trying rule");
+        return appliesTo (aType, aItem1, aItem2) && run ();
+    }
+
+    /***
+     * Executes the instructions in the rule.
+     * 
+     * @return true if the rule was useful, ie did change something in the game.
+     *         false if the rule did not change anything.
+     * 
+     * @throws GameEngineException
+     */
 
     public boolean run () throws GameEngineException
     {
@@ -78,13 +130,21 @@ public class Rule extends GameObject
         return useful;
     }
 
-    public void parse (Tokenizer t)
+    public void parse (Tokenizer t) throws GameEngineException
     {
         String cmd = t.getWord ();
         Instruction i = null;
         if (cmd.equals ("IF"))
         {
             i = new IfInstruction (getGame ());
+        }
+        else if (cmd.equals ("IFNOT"))
+        {
+            i = new IfNotInstruction (getGame ());
+        }
+        else if (cmd.equals ("FLIP"))
+        {
+            i = new FlipInstruction (getGame ());
         }
         else if (cmd.equals ("SET"))
         {
@@ -103,7 +163,11 @@ public class Rule extends GameObject
             i = new LoseInstruction (getGame ());
         }
 
-        if (i != null)
+        if (i == null)
+        {
+            throw new GameEngineException ("Unknown rule instruction: " + cmd);
+        }
+        else
         {
             i.parse (t);
             _Instructions.add (i);
