@@ -1,11 +1,20 @@
-#Object Property Reference
+# Object Property Reference
 
 = Introduction =
 
-Add your content here.
+Every item in the game has a set of named properties that can be set in the game description file, then set or checked in scripts.
 
+= Changing the values of properties =
+Some properties control how the player interacts with the item. For example, if an item is locked, the player cannot easily open or close that item. However, a script has no such restrictions: you can change the value of the `OPEN` property even when the `LOCKED` property is true.
 
 = Properties =
+
+== EMPTY ==
+Whether the item is empty.
+
+An item is empty if it contains no other items.
+
+While you can check the value of this property in scripts, you cannot change its value. To make an item empty, remove all items it contains by changing their `LOCATION` property.
 
 == FIXED ==
 Whether the item is fixed in the room.
@@ -36,11 +45,9 @@ Items have a "contents" relationship with each other, as every item may be conta
 == LOCKED ==
 Whether the item is locked.
 
-This property works in conjunction with the KEY property. When the user operates the key on the item, it becomes locked or unlocked. 
+This property works in conjunction with the `KEY` property. When the user operates the key on the item, it becomes locked or unlocked. 
 
 When an item is locked, the player cannot easily open or close it.
 
 == OPEN ==
 Whether the item is open or closed.
-
-
