@@ -1,0 +1,46 @@
+#Object Property Reference
+
+= Introduction =
+
+Add your content here.
+
+
+= Properties =
+
+== FIXED ==
+Whether the item is fixed in the room.
+
+== ICON ==
+The icon to be used to represent the item.
+
+== KEY ==
+The name of an item that acts as a key.
+
+== LIGHT ==
+The name of an item that acts as a light source.
+
+This property is useful mainly in items describing rooms. When a room has a light source, the light source must be lit for the contents of a room to be visible.
+
+If you do not define a light source for a room, the game engine considers that the room is lit by an eternal light source and is always visible.
+
+== LIT ==
+Whether the object is lit.
+
+== LOCATION ==
+The name of the item that contains this item.
+
+Items have a "contents" relationship with each other, as every item may be contained in other items. For example:
+ * The player item is contained in the current room
+ * Items that the player is carrying are contained in the Player item
+
+== LOCKED ==
+Whether the item is locked.
+
+This property works in conjunction with the KEY property. When the user operates the key on the item, it becomes locked or unlocked. 
+
+When an item is locked, the player cannot easily open or close it.
+
+== OPEN ==
+Whether the item is open or closed.
+
+
